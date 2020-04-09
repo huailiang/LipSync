@@ -1,4 +1,4 @@
-## LipSyncLite是什么？
+## LipSync是什么？
 
 LipSyncLite是一个基于Unity的独立、轻量化口型匹配解决方案。它可以帮助开发者在Unity上，用相对少的时间精力实现效果相对令人满意的“口型匹配”功能。
 
@@ -8,7 +8,7 @@ LipSyncLite没有借助第三方插件，所有的逻辑都在插件内部得以
 
 不过LipSyncLite并不是万能的。为了能够愉快而有效地使用LipSyncLite，你需要知道它目前做得到的事情有：
 
-*	实时地分析语音数据，运用语音识别的一些理论，识别出某一时间帧中这段语音在日语或汉语元音是什么，如果有的话。
+*	实时地分析语音数据，运用语音识别的一些理论，识别出某一时间帧中这段语音在日语或汉语 __元音__ 是什么，如果有的话。
 *	事先分析好语音数据，把声学特征识别结果（也就是元音）作为资源文件存储在项目中，运行时直接读取这些数据。也就是烘焙功能。
 *	根据识别结果，生成动画权重数值，并把它们赋到目标对象上。
 *	让你的角色看起来真的像在说话一样。
@@ -27,14 +27,16 @@ http://unity-chan.com/
 
 LipSyncLite需要你提供以下资源：
 
-1)	语音文件。
+__1) 语音文件。__
+
 角色使用的语音文件。
 为了保证语音识别方面的可靠性，语音中的噪音不能特别大。些许的噪音可以接受，LipSyncLite一定程度上可以帮助剔除。
 语音中也不能包含其他非语音的声音，例如背景音乐，环境音效等等。
 除此之外没有其他的强制要求，只要是语音都可以使用。日语和汉语的语音可以得到最佳的匹配效果，其他语言的语音也可以使用。
 对于文件资源的摆放位置，有一个非强制的推荐性要求，即把每一个人的所有语音放置在各自的一个文件夹中。这有利于提高烘焙功能的使用效率。
 
-2)	带有口型BlendShape的3D模型。
+__2) 带有口型BlendShape的3D模型。__
+
 角色的3D模型，并且需要包括口型的BlendShape。至少每一个元音要对应一个BlendShape属性值，也就是说，在对应日语的情况下，你需要5个BlendShape属性值，对应汉语则需要6个。如果你的语音是这两种语言以外的，可以使用汉语元音的标准。
 如果你不知道BlendShape是什么，可以结合演示场景参考UnityChan的模型。
 
@@ -43,30 +45,31 @@ LipSyncLite需要你提供以下资源：
 就让我们以UnityChan模型为素材，学习如何使用LipSyncLite。
 首先新建一个空场景，并在场景中摆放好摄像机与灯光的位置。如果你愿意，可以在场景中搭出一个小房间。然后找到这一个Prefab：LipSyncLite/Demo/Prefabs/UnityChanTemplate.prefab。把它放置到场景中，并调整好它与摄像机的相对位置。你应该会在Inspector中看到图1中的内容。
  
-![](/im/im1.png)
-
-图 1 UnityChanTemplate的组件
+<br><img src='im/im1.png'><br>
+*图1 UnityChanTemplate的组件*
 
 这个Prefab上已经挂载了一些让UnityChan更“生动活泼”的组件，它们与LipSyncLite的功能无关，你可以就这样放着不管。
 接下来，找到这个脚本：LipSyncLite/Scripts/LipSync.cs，并把它挂载到刚才放置好的Prefab上。此时你应该在Inspector中看到图2中的内容。从中可以看到3个空缺项AudioSource，TargetBlendShape和VowelPropertyNames，正好对应前文所说的语音数据的来源、目标对象以及属性名。
  
-
- ![](/im/im2.png)
-图 2 LipSync脚本组件
+<br><img src='im/im2.png'><br>
+*图2 LipSync脚本组件*
 
 先从AudioSource开始。在刚才的Prefab上添加一个AudioSource组件。如果你想把AudioSource加到其他的GameObject上，也不是不可以。为这个AudioSource设置一个AudioClip，你可以从UnityChan/Voice/Resources中任选一个，也可以使用自己准备的语音文件。然后，把这个挂载着AudioSource的物体赋予到LipSync组件的AudioSource上。
  
-图 3 UnityChanTemplate中包含口型BlendShape的GameObject
+ <br><img src='im/im3.png'><br>
+*图3 UnityChanTemplate中包含口型BlendShape的GameObject*
 
 接下来是TargetBlendShape。你需要找到你的模型上带有口型BlendShape的那个GameObject。它在Unity里表现为SkinnedMeshRenderer组件。以UnityChan模型为例，需要找的GameObject位于图3中的位置。把这个GameObject赋予到LipSync的TargetBlendShape上。为了阐述方便，后文我们就把这个“带有口型BlendShape的那个GameObject”称之为“目标对象”。
 
 这里先观察一下这个目标对象。如图4中所示，展开BlendShapes项，可以看到它提供的BlendShapes属性值。这个UnityChan模型中提供的口型BlendShape的属性值即为：blendShapes1.MTH_A，blendShapes1.MTH_I，blendShapes1.MTH_U，blendShapes1.MTH_E，blendShapes1.MTH_O，对应的正好是日语中的5个元音。接下来就把这5个属性名一一对应地填到LipSync中的VowelPropertyNames当中。
  
-图 4 UnityChan具有的脸部BlendShape
+ <br><img src='im/im4.png'><br>
+*图4 UnityChan具有的脸部BlendShape*
 
 至此，你的LipSync组件应该变得像图5所示。
  
-图 5 LipSync设置完毕后的状态
+ <br><img src='im/im5.png'><br>
+*图5 LipSync设置完毕后的状态*
 
 最后可以进行一些设置。首先是BlendShape属性值共用的最小值和最大值，即PropertyMinValue和PropertyMaxValue，默认值是0和100，你可以根据实际情况进行调整。其次是一些进阶选项，可以看到相较图1，图5中的“Advanced Options”被展开了。
 WindowSize的含义是窗口大小，它决定一次性从整个语音数据中截取多长的语音帧进行分析。它必须是2的幂。一般来说，512或1024是比较令人满意的取值，前者性能更加而识别精度稍差，后者则反之。低于512的情况下，虽然性能提升比较明显，但识别精度会变得很低；高于1024的情况下，性能会变得非常差，然而识别精度也不会提高很多。
@@ -80,22 +83,26 @@ MoveTowardsSpeed的含义是平滑过渡的速度。语音帧与语音帧之间�
 在这个例子中，所识别的语音是日语，正如RecognizerLanguage所示的Japanese。如果你需要识别汉语，可以把RecognizerLanguage项切换成Chinese，此时VowelPropertyNames中会多出一个“v”的元音。除此之外没有其他变化。
 除了能够为含BlendShape的模型提供口型匹配功能，LipSyncLite也可以为Live2D模型服务。把TargetType切换到Live2D，即可看到如图6所示的界面。
  
-图 6 Live2D模式下的设置界面
+ <br><img src='im/im6.png'><br>
+*图6 Live2D模式下的设置界面*
 
 这与BlendShape模式有着比较大的区别。这是由于Live2D模型的特性而产生的结果。对于Live2D模型来说，一个“部件”上最多只能绑定2个属性值（如果使用Pro版本制作模型则可以绑定3个）。所以，必须实现考察好，这两个值以怎么样的组合可以获得怎样的口型，然后再填写到VowelProertyMaxValues中。之后，还要使用LipSyncLite提供的协助Live2D模型赋值的脚本LipSyncLive2DHelper来真正达到口型匹配效果。总的来说，目前这一功能尚不完善，还存在很多问题，不过还是可以尝试进行使用。
 以上介绍的都是在运行时即时地进行口型匹配。而在这一类动画相关的技术中，有一个很常用的处理方式——烘焙。以一定的灵活性为代价，把动画信息在开发阶段全部准备好，在运行时直接读取，这样便可在运行时省去所有的识别运算，从而大幅提高性能。LipSyncLite也提供了这样的功能。
 
 首先，先把LipSync组件中的LipSyncMethod切换为Baked，此时你会看到图7的内容。
  
-图 7 Baked模式下的LipSync
+ <br><img src='im/im7.png'><br>
+*图7 Baked模式下的LipSync*
 
 点击LipSync Baker按钮，会出现图8所示界面。
  
-图 8 LipSync Baker界面
+ <br><img src='im/im8.png'><br>
+*图8 LipSync Baker界面*
 
 在这里，你可以导入一个文件夹里的语音文件，并把它们的口型匹配数据烘焙到本地文件上。这里利用了Unity的动画系统，输出的文件就是AnimationClip与AnimatorController。
 先从AudioClipInputFolderPath开始，这里点击“Browse...”按钮可以选择一个路径。当然，你只能选择位于Assets文件夹内的路径。之后，LipSyncLite会搜索该文件夹内所有的音频文件，并记录到AudioClipList中，如图9。
  
+ <br><img src='im/im10.png'><br>
 图 9 导入完毕后的AudioClipList
 
 右边部分的设置，与实时模式下的设置基本相同，就是多出了两项AnimatorName和TargetRelativePath。AnimatorName是烘焙完毕后，生成的Animator的名称。你可以自行进行指定。TargetRelativePath是为了应对特殊情况，一般来说生成的Animator会被挂载在目标对象上，但是可能会因为某些原因，导致只能挂载在它的某一个父级GameObject。这个TargetRelativePath就是用来指定相对路径用的。通常情况下不会用到它，这里我们选择不填写。
@@ -103,10 +110,13 @@ MoveTowardsSpeed的含义是平滑过渡的速度。语音帧与语音帧之间�
 全部设置完毕后，你可以点击“Bake”按钮。选择一个Assets文件夹内的路径，即可开始烘焙工作。烘焙工作需要的时间比较长，限于目前采用的计算方法，可能会长于语音文件本身的时间长度，请耐心等待一下。
 经过漫长的等待后，你可以在刚才指定的路径中找到烘焙结果，如图10所示。
  
-图 10 烘焙成果
+  <br><img src='im/im11.png'><br>
+*图10 烘焙成果*
 
 然后，在目标对象上新建一个Animator组件，并把生成的AnimatorController赋予到上面。回到LipSync组件上，将目标对象赋予到TargetAnimator上。最后应该像图11这样。
- 
+
+   <br><img src='im/im12.png'><br>
+
 尝试运行一下，你应该可以看到UnityChan的嘴巴又动了起来。
 至此，你应该已经会使用LipSyncLite几乎所有的功能了。接下来，就看你如何运用LipSyncLite带给你的口型匹配功能了。
 
@@ -137,8 +147,9 @@ LipSyncLite的核心步骤正是如此。提取共振峰的方法是，在前一
 
 5、把共振峰映射为元音特征值，进行平滑过渡处理，再赋予到目标对象上
 后续步骤则比较容易理解，无非是一些映射操作与平滑过渡处理。平滑过渡的方法直接使用了Mathf.MoveTowards。
-我想要改进LipSyncLite，可以做些什么？
-如果你有这样的想法，请再次接受笔者的感谢。欢迎在GitHub上共同开发LipSyncLite。
+
+## 我想要改进LipSync，可以做些什么？
+
 目前，有以下几个可以改进的方向：
 
 1、更优化的DCT算法
@@ -158,7 +169,5 @@ LipSyncLite的核心步骤正是如此。提取共振峰的方法是，在前一
 5、更加精确的语音识别方法
 如果你对语音识别有一些研究，你应该知道，目前的语音识别方法中并没有去除基频的影响。如果基频的能量很高，会明显影响共振峰的识别。
 
-笔者曾经想要运用LPC分析法。笔者的理解是，它本质上是一种解卷积算法，可以把基频频谱与共振峰频谱分离开，从而单独对共振峰频谱进行分析。
-但是笔者数学知识不足，不是很理解这个分析办法。而且，LPC分析法的效率是否足够进行每秒60次计算？实际效果能够提高多少？鉴于这些问题，笔者最后并没有实现这个方法。
-然而，既然有一个更精确的方法，为什么不试试看呢？如果你对于语音识别有着充分的理解，希望你能够协助笔者在Unity上开发出LPC分析法。
+笔者曾经想要运用LPC分析法。笔者的理解是，它本质上是一种解卷积算法，可以把基频频谱与共振峰频谱分离开，从而单独对共振峰频谱进行分析。但是笔者数学知识不足，不是很理解这个分析办法。而且，LPC分析法的效率是否足够进行每秒60次计算？实际效果能够提高多少？鉴于这些问题，笔者最后并没有实现这个方法。然而，既然有一个更精确的方法，为什么不试试看呢？如果你对于语音识别有着充分的理解，希望你能够协助笔者在Unity上开发出LPC分析法。
 
