@@ -94,7 +94,7 @@ namespace LipSync
         }
     }
 
-
+#if USE_FMOD
     [CustomEditor(typeof(FmodLipSync))]
     [CanEditMultipleObjects]
     public class FmodLipSyncEditor : LipSyncEditor
@@ -114,5 +114,5 @@ namespace LipSync
             serializedObject.ApplyModifiedProperties();
         }
     }
-
+#endif
 }

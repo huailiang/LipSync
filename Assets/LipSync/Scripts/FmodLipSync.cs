@@ -1,4 +1,5 @@
-﻿using FMODUnity;
+﻿#if USE_FMOD
+using FMODUnity;
 using UnityEngine;
 
 namespace LipSync
@@ -47,3 +48,5 @@ namespace LipSync
         
     }
 }
+
+#endif
