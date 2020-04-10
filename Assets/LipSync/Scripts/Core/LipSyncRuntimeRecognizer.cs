@@ -54,7 +54,7 @@ namespace LipSync
             return result;
         }
 
-#if USE_FMOD
+#if FMOD_LIVEUPDATE
         public string RecognizeByAudioSource(FMOD.DSP m_FFTDsp, int rate)
         {
             string result = null;

@@ -1,4 +1,4 @@
-﻿#if USE_FMOD
+﻿#if FMOD_LIVEUPDATE
 using FMODUnity;
 using UnityEngine;
 

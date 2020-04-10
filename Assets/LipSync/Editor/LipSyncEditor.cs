@@ -94,7 +94,7 @@ namespace LipSync
         }
     }
 
-#if USE_FMOD
+#if FMOD_LIVEUPDATE
     [CustomEditor(typeof(FmodLipSync))]
     [CanEditMultipleObjects]
     public class FmodLipSyncEditor : LipSyncEditor

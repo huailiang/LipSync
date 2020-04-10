@@ -1,22 +1,26 @@
 ##FMOD LipSync
 
-1. download fmod unitypackage
+1. Download fmod unitypackage
 
 链接: https://pan.baidu.com/s/1dWuKDKMh1MDsnbN73h9xVw 提取码: 7z8v
 
-2. import unitypackage to unity project
+2. Import unitypackage to unity project
 
 
-3. import fmod asset (.bank)
+3. Import fmod asset (.bank)
 
 4. Add macro in buildsettings
 
-macro: USE_FMOD
+	macro: FMOD_LIVEUPDATE
+
+<br><img src='.github/im9.png'><br>
 
 5. Open Scene named FmodScene
    
    path: Assets/LipSync/Demo/Scenes/FmodScene
 
-6. config fmod events in FmodLipSync
+6. Config fmod events in FmodLipSync
+
+<br><img src='.github/im12.png'><br>
     
-7. Start Game
+7. Start Game and run
