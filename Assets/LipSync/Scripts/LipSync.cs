@@ -6,12 +6,11 @@ namespace LipSync
 {
     public class LipSync : MonoBehaviour
     {
-
         public static string[] vowelsJP = { "a", "i", "u", "e", "o" };
         public static string[] vowelsCN = { "a", "e", "i", "o", "u", "v" };
 
         protected const int MAX_BLEND_VALUE_COUNT = 6;
-        
+
 
         #region Fields for Runtime LipSync
         public ERecognizerLanguage recognizerLanguage;
@@ -78,7 +77,6 @@ namespace LipSync
             {
                 blendValuesSum += currentBlendValues[j];
             }
-
             for (int k = 0; k < currentBlendValues.Length; ++k)
             {
                 if (propertyIndexs[k] != -1)
