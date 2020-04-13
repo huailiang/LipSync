@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Text;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace LipSync
 {
@@ -12,9 +15,12 @@ namespace LipSync
     {
         public StudioEventEmitter emiter;
         private int rate;
+        private float audioLen;
         FMOD.DSP m_FFTDsp;
         FMOD.ChannelGroup master;
         FMOD.DSP mixerHead;
+
+        public const string recdPat = "Assets/LipSync/Editor/recd.txt";
 
         struct Record
         {
@@ -61,6 +67,10 @@ namespace LipSync
             {
                 records.Clear();
                 emiter.Play();
+                int len;
+                emiter.EventDescription.getLength(out len);
+                audioLen = len / 1000.0f;
+                Debug.Log(len);
                 FMOD.SPEAKERMODE mode;
                 int raw;
                 RuntimeManager.CoreSystem.getSoftwareFormat(out rate, out mode, out raw);
@@ -76,6 +86,11 @@ namespace LipSync
             {
                 OutputRecd();
                 records.Clear();
+               
+#if UNITY_EDITOR
+                AssetDatabase.Refresh();
+                Debug.Log("output recd finish");
+#endif
             }
         }
 
@@ -98,10 +113,10 @@ namespace LipSync
         /// </summary>
         void OutputRecd()
         {
-            using (FileStream writer = new FileStream("recd.txt", FileMode.Create, FileAccess.ReadWrite))
+            using (FileStream writer = new FileStream(recdPat, FileMode.Create, FileAccess.ReadWrite))
             {
                 StreamWriter sw = new StreamWriter(writer, Encoding.Unicode);
-
+                sw.WriteLine(audioLen);
                 for (int i = 0; i < records.Count; i++)
                 {
                     sw.WriteLine(records[i]);

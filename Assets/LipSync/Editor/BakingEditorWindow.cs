@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
-using UnityEditor.Animations;
 using UnityEngine;
 
 namespace LipSync
@@ -164,101 +163,83 @@ namespace LipSync
                 else
                 {
                     string path = "";
-                    while (true)
+                    path = EditorUtility.SaveFolderPanel("Save generated Animator to...", Application.dataPath, "");
+                    if (path.IndexOf(Application.dataPath, 0) == 0)
                     {
-                        path = EditorUtility.SaveFolderPanel("Save generated Animator to...", Application.dataPath, "");
-                        if (path.IndexOf(Application.dataPath, 0) == 0)
+                        path = path.Substring(Application.dataPath.Length - "Assets".Length);
+                        if (AssetDatabase.IsValidFolder(path + "/GeneratedClips") == false)
                         {
-                            path = path.Substring(Application.dataPath.Length - "Assets".Length);
-
-                            AnimatorController generatedAnimator = AnimatorController.CreateAnimatorControllerAtPath(path + "/" + animatorName + ".controller");
-                            AnimatorStateMachine stateMachine = generatedAnimator.layers[0].stateMachine;
-
-                            if (AssetDatabase.IsValidFolder(path + "/GeneratedClips") == false)
-                            {
-                                AssetDatabase.CreateFolder(path, "GeneratedClips");
-                            }
-
-                            LipSyncOfflineRecognizer recognizer = new LipSyncOfflineRecognizer(recognizerLanguage, amplitudeThreshold, windowSize, shiftStepSize);
-
-                            Dictionary<string, int> vowelToIndexDict = new Dictionary<string, int>();
-                            for (int i = 0; i < currentVowels.Length; ++i)
-                            {
-                                vowelToIndexDict[currentVowels[i]] = i;
-                            }
-
-                            List<AnimationClip> tempClipList = new List<AnimationClip>(audioClipToBake.Count);
-                            for (int j = 0; j < audioClipToBake.Count; ++j)
-                            {
-                                AnimationClip clip = new AnimationClip();
-                                AnimationCurve[] curveArray = new AnimationCurve[currentVowels.Length];
-                                for (int jj = 0; jj < currentVowels.Length; ++jj)
-                                {
-                                    curveArray[jj] = new AnimationCurve();
-                                }
-
-                                float[] targetBlendValues = new float[currentVowels.Length];
-                                float[] currentBlendValues = new float[currentVowels.Length];
-                                string[] recognizeResult = recognizer.RecognizeAllByAudioClip(audioClipToBake[j]);
-                                float timeUnit = 1024.0f * (1.0f / (float)audioClipToBake[j].frequency);
-
-                                float blendValuesSum = 0.0f;
-                                for (int k = 0; k < recognizeResult.Length; ++k)
-                                {
-                                    for (int kk = 0; kk < currentVowels.Length; ++kk)
-                                    {
-                                        targetBlendValues[kk] = 0;
-                                    }
-                                    if (recognizeResult[k] != null)
-                                    {
-                                        targetBlendValues[vowelToIndexDict[recognizeResult[k]]] = 1.0f;
-                                    }
-                                    blendValuesSum = 0.0f;
-                                    for (int kk = 0; kk < currentVowels.Length; ++kk)
-                                    {
-                                        blendValuesSum += currentBlendValues[kk];
-                                    }
-
-                                    for (int kk = 0; kk < currentVowels.Length; ++kk)
-                                    {
-                                        currentBlendValues[kk] = Mathf.MoveTowards(currentBlendValues[kk], targetBlendValues[kk], moveTowardsSpeed * timeUnit);
-                                        Keyframe keyframe = new Keyframe(timeUnit * k, Mathf.Lerp(propertyMinValue, propertyMaxValue, currentBlendValues[kk]));
-                                        curveArray[kk].AddKey(keyframe);
-                                    }
-                                }
-
-                                for (int jj = 0; jj < currentVowels.Length; ++jj)
-                                {
-                                    Keyframe keyframe = new Keyframe(timeUnit * recognizeResult.Length, 0);
-                                    curveArray[jj].AddKey(keyframe);
-                                }
-
-                                for (int l = 0; l < currentVowels.Length; ++l)
-                                {
-                                    clip.SetCurve(targetRelativePath, typeof(SkinnedMeshRenderer), "blendShape." + propertyNames[l], curveArray[l]);
-                                }
-                                tempClipList.Add(clip);
-                            }
-
-                            for (int m = 0; m < tempClipList.Count; ++m)
-                            {
-                                AssetDatabase.CreateAsset(tempClipList[m], path + "/GeneratedClips/" + audioClipToBake[m].name + "_anim.anim");
-                                AnimatorState state = stateMachine.AddState(audioClipToBake[m].name + "_anim");
-                                state.motion = tempClipList[m];
-                            }
-
-                            EditorUtility.DisplayDialog("Complete Baking", "LipSync baking is completed. Please check the specified folder for result.", "OK");
-                            break;
+                            AssetDatabase.CreateFolder(path, "GeneratedClips");
                         }
-                        else if (path.Length == 0)
+
+                        LipSyncOfflineRecognizer recognizer = new LipSyncOfflineRecognizer(recognizerLanguage, amplitudeThreshold, windowSize, shiftStepSize);
+
+                        Dictionary<string, int> vowelToIndexDict = new Dictionary<string, int>();
+                        for (int i = 0; i < currentVowels.Length; ++i)
                         {
-                            break;
+                            vowelToIndexDict[currentVowels[i]] = i;
                         }
-                        else
+
+                        List<AnimationClip> tempClipList = new List<AnimationClip>(audioClipToBake.Count);
+                        for (int j = 0; j < /*audioClipToBake.Count*/1; ++j)
                         {
-                            Debug.Log(path);
-                            EditorUtility.DisplayDialog("Invalid path", "This folder is not contained in the asset path. Please make sure you choose a folder inside the \"Assets\" folder.", "OK");
+                            AnimationClip clip = new AnimationClip();
+                            AnimationCurve[] curveArray = new AnimationCurve[currentVowels.Length];
+                            for (int jj = 0; jj < currentVowels.Length; ++jj)
+                            {
+                                curveArray[jj] = new AnimationCurve();
+                            }
+
+                            float[] targetBlendValues = new float[currentVowels.Length];
+                            float[] currentBlendValues = new float[currentVowels.Length];
+                            string[] recognizeResult = recognizer.RecognizeAllByAudioClip(audioClipToBake[j]);
+                            float timeUnit = 1024.0f * (1.0f / (float)audioClipToBake[j].frequency);
+
+                            float blendValuesSum = 0.0f;
+                            for (int k = 0; k < recognizeResult.Length; ++k)
+                            {
+                                for (int kk = 0; kk < currentVowels.Length; ++kk)
+                                {
+                                    targetBlendValues[kk] = 0;
+                                }
+                                if (recognizeResult[k] != null)
+                                {
+                                    targetBlendValues[vowelToIndexDict[recognizeResult[k]]] = 1.0f;
+                                }
+                                blendValuesSum = 0.0f;
+                                for (int kk = 0; kk < currentVowels.Length; ++kk)
+                                {
+                                    blendValuesSum += currentBlendValues[kk];
+                                }
+
+                                for (int kk = 0; kk < currentVowels.Length; ++kk)
+                                {
+                                    currentBlendValues[kk] = Mathf.MoveTowards(currentBlendValues[kk], targetBlendValues[kk], moveTowardsSpeed * timeUnit);
+                                    Keyframe keyframe = new Keyframe(timeUnit * k, Mathf.Lerp(propertyMinValue, propertyMaxValue, currentBlendValues[kk]));
+                                    curveArray[kk].AddKey(keyframe);
+                                }
+                            }
+
+                            for (int jj = 0; jj < currentVowels.Length; ++jj)
+                            {
+                                Keyframe keyframe = new Keyframe(timeUnit * recognizeResult.Length, 0);
+                                curveArray[jj].AddKey(keyframe);
+                            }
+
+                            for (int l = 0; l < currentVowels.Length; ++l)
+                            {
+                                clip.SetCurve(targetRelativePath, typeof(SkinnedMeshRenderer), "blendShape." + propertyNames[l], curveArray[l]);
+                            }
+                            tempClipList.Add(clip);
                         }
+
+                        for (int m = 0; m < tempClipList.Count; ++m)
+                        {
+                            AssetDatabase.CreateAsset(tempClipList[m], path + "/GeneratedClips/" + audioClipToBake[m].name + "_anim.anim");
+                        }
+
+                        EditorUtility.DisplayDialog("Complete Baking", "LipSync baking is completed. Please check the specified folder for result.", "OK");
+
                     }
                 }
             }
