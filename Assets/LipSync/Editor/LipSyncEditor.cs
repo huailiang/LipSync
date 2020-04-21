@@ -106,6 +106,7 @@ namespace LipSync
             serializedObject.UpdateIfRequiredOrScript();
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("emiter"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("save"));
             EditorGUILayout.Space();
             
             GUIVowel(targetLipSync);

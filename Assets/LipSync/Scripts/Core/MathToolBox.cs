@@ -132,10 +132,10 @@ namespace LipSync
             float[] result = new float[size];
 
             float sum = 0.0f;
-            float middlePoint = (float)(size - 1) / 2;
+            float mu = (float)(size - 1) / 2;
             for (int i = 0; i < size; ++i)
             {
-                float param = -((i - middlePoint) * (i - middlePoint)) / (2 * deviationSquare);
+                float param = -((i - mu) * (i - mu)) / (2 * deviationSquare);
                 result[i] = Mathf.Exp(param);
                 sum += result[i];
             }

@@ -41,9 +41,7 @@ namespace XEditor
             if (boneGo != null)
             {
                 if (boneGo.GetComponent<SkinnedMeshRenderer>() == null)
-                {
                     EditorGUILayout.HelpBox("select bone is invalid, not found SkinedmeshRender attached", MessageType.Error);
-                }
                 else
                     bonePath = GetRootFullPath(boneGo.transform);
             }
@@ -56,7 +54,7 @@ namespace XEditor
                 EditorGUILayout.LabelField(bonePath);
             }
 
-            duration = EditorGUILayout.FloatField("duration", duration);
+            EditorGUILayout.LabelField("duration:" + duration);
 
             EditorGUILayout.LabelField(LipSync.LipSync.recdPat);
             if (!File.Exists(LipSync.LipSync.recdPat))

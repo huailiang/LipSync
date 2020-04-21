@@ -14,6 +14,7 @@ namespace LipSync
     public class FmodLipSync : LipSync
     {
         public StudioEventEmitter emiter;
+        public bool save;
         private int rate;
         private float audioLen;
         FMOD.DSP m_FFTDsp;
@@ -82,12 +83,15 @@ namespace LipSync
             }
             else if (records.Count > 0)
             {
-                OutputRecd();
+                if (save) OutputRecd();
                 records.Clear();
-               
+
 #if UNITY_EDITOR
-                AssetDatabase.Refresh();
-                Debug.Log("output recd finish");
+                if (save)
+                {
+                    AssetDatabase.Refresh();
+                    Debug.Log("output recd finish");
+                }
 #endif
             }
         }
