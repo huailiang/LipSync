@@ -20,8 +20,6 @@ namespace LipSync
         FMOD.ChannelGroup master;
         FMOD.DSP mixerHead;
 
-        public const string recdPat = "Assets/LipSync/Editor/recd.txt";
-
         struct Record
         {
             internal char ch;

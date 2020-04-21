@@ -10,6 +10,7 @@ namespace LipSync
         public static string[] vowelsCN = { "a", "e", "i", "o", "u", "v" };
 
         protected const int MAX_BLEND_VALUE_COUNT = 6;
+        public const string recdPat = "Assets/LipSync/Editor/recd.txt";
 
 
         #region Fields for Runtime LipSync

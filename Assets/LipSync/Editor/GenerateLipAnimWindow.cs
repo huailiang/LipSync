@@ -58,8 +58,8 @@ namespace XEditor
 
             duration = EditorGUILayout.FloatField("duration", duration);
 
-            EditorGUILayout.LabelField(FmodLipSync.recdPat);
-            if (!File.Exists(FmodLipSync.recdPat))
+            EditorGUILayout.LabelField(LipSync.LipSync.recdPat);
+            if (!File.Exists(LipSync.LipSync.recdPat))
             {
                 EditorGUILayout.HelpBox("record file not found, generate at first", MessageType.Error);
             }
@@ -82,7 +82,7 @@ namespace XEditor
 
         private void Generate()
         {
-            string tempPath = FmodLipSync.recdPat;
+            string tempPath = LipSync.LipSync.recdPat;
             if (File.Exists(tempPath))
             {
                 var list = Read(tempPath);
@@ -94,7 +94,7 @@ namespace XEditor
             }
             else
             {
-                EditorUtility.DisplayDialog("tip", "not found " + LipSync.FmodLipSync.recdPat, "ok");
+                EditorUtility.DisplayDialog("tip", "not found " + LipSync.LipSync.recdPat, "ok");
             }
         }
 
