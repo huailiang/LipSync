@@ -151,9 +151,20 @@ namespace LipSync
             float[] result = new float[size];
             switch (windowType)
             {
+                case EWindowType.Rectangular:
+                    for (int i = 0; i < size; ++i)
+                        result[i] = 1.0f;
+                    break;
                 case EWindowType.Hamming:
                     for (int i = 0; i < size; ++i)
                         result[i] = 0.53836f - 0.46164f * Mathf.Cos((2 * Mathf.PI * i) / (size - 1));
+                    break;
+                case EWindowType.Hanning:
+                    for (int i = 0; i < size; ++i)
+                        result[i] = (float)(0.5f * (1.0 - Mathf.Cos((2 * Mathf.PI * i) / (size - 1))));
+                    break;
+                default:
+                    Debug.LogWarning("not implement yet now");
                     break;
             }
             return result;
