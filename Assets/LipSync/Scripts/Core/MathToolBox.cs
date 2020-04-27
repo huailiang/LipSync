@@ -10,10 +10,12 @@ namespace LipSync
             /// Paddle with zeros.
             /// </summary>
             Zero = 0,
+
             /// <summary>
             /// Repeat the first value on the left and the last value on the right.
             /// </summary>
             Repeat = 1,
+
             /// <summary>
             /// Loop the array.
             /// </summary>
@@ -45,8 +47,10 @@ namespace LipSync
                 {
                     sumCos += data[k] * Mathf.Cos((Mathf.PI / data.Length) * m * (k + 0.5f));
                 }
+
                 result[m] = (sumCos > 0) ? sumCos : -sumCos;
             }
+
             return result;
         }
 
@@ -65,7 +69,8 @@ namespace LipSync
                 output[n] = 0.0f;
                 for (int m = 0; m < filter.Length; ++m)
                 {
-                    output[n] += MathToolBox.GetValueFromArray(data, n - filterMiddlePoint + m, paddleType) * filter[filter.Length - m - 1];
+                    output[n] += MathToolBox.GetValueFromArray(data, n - filterMiddlePoint + m, paddleType) *
+                                 filter[filter.Length - m - 1];
                 }
             }
         }
@@ -94,7 +99,7 @@ namespace LipSync
                 {
                     if (isIncreasing)
                     {
-                        if (lastPeak < data[i])  // Peak found. 找到峰值
+                        if (lastPeak < data[i]) // Peak found. 找到峰值
                         {
                             isPeakIncreasing = true;
                         }
@@ -107,13 +112,17 @@ namespace LipSync
                                 peakPosition[peakNum] = lastPeakPosition;
                                 ++peakNum;
                             }
+
                             isPeakIncreasing = false;
                         }
+
                         lastPeak = data[i];
                         lastPeakPosition = i;
                     }
+
                     isIncreasing = false;
                 }
+
                 if (peakNum >= peakValue.Length)
                 {
                     break;
@@ -132,41 +141,61 @@ namespace LipSync
             float[] result = new float[size];
 
             float sum = 0.0f;
-            float mu = (float)(size - 1) / 2;
+            float mu = (float) (size - 1) / 2;
             for (int i = 0; i < size; ++i)
             {
                 float param = -((i - mu) * (i - mu)) / (2 * deviationSquare);
                 result[i] = Mathf.Exp(param);
                 sum += result[i];
             }
+
             for (int j = 0; j < size; ++j)
             {
                 result[j] /= sum;
             }
+
             return result;
         }
 
+        /*
+         * https://blog.csdn.net/qq_30404573/article/details/86697057
+         */
         public static float[] GenerateWindow(int size, EWindowType windowType)
         {
             float[] result = new float[size];
             switch (windowType)
             {
                 case EWindowType.Rectangular:
+                    for (int i = 0; i < size; ++i) result[i] = 1.0f;
+                    break;
+                case EWindowType.Triangle:
                     for (int i = 0; i < size; ++i)
-                        result[i] = 1.0f;
+                        result[i] = i < size / 2.0f ? 2 * i / (size - 2) : (2 * size - 4 - 2 * i) / (size - 2);
                     break;
                 case EWindowType.Hamming:
                     for (int i = 0; i < size; ++i)
-                        result[i] = 0.53836f - 0.46164f * Mathf.Cos((2 * Mathf.PI * i) / (size - 1));
+                        result[i] = 0.53836f - 0.46164f * Mathf.Cos((2 * Mathf.PI * i) / size);
                     break;
                 case EWindowType.Hanning:
                     for (int i = 0; i < size; ++i)
-                        result[i] = (float)(0.5f * (1.0 - Mathf.Cos((2 * Mathf.PI * i) / (size - 1))));
+                        result[i] = (float) (0.5f * (1.0 - Mathf.Cos((2 * Mathf.PI * i) / size)));
+                    break;
+                case EWindowType.BlackMan:
+                    for (int i = 0; i < size; ++i)
+                        result[i] = (float) (0.42f - 0.5 * Mathf.Cos((2 * Mathf.PI * i) / size)) +
+                                    (float) (0.08 * Mathf.Cos(4 * Mathf.PI * i) / size);
+                    break;
+                case EWindowType.BlackmanHarris:
+                    for (int i = 0; i < size; ++i)
+                        result[i] = (float) ((0.35875 - 0.48829 * Mathf.Cos((2 * Mathf.PI * i) / size)) +
+                                             (0.14128 * Mathf.Cos(4 * Mathf.PI * i) / size) -
+                                             (0.01168 * Mathf.Cos(6 * Mathf.PI * i / size)));
                     break;
                 default:
                     Debug.LogWarning("not implement yet now");
                     break;
             }
+
             return result;
         }
 
@@ -190,6 +219,7 @@ namespace LipSync
                         {
                             actualIndex += data.Length;
                         }
+
                         actualIndex %= data.Length;
                         return data[actualIndex];
                     default:
