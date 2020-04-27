@@ -42,10 +42,10 @@ namespace LipSync
             }
         }
 
-        public string RecognizeByAudioSource(AudioSource audioSource)
+        public string RecognizeByAudioSource(AudioSource audioSource, FFTWindow window)
         {
             string result = null;
-            audioSource.GetSpectrumData(playingAudioSpectrum, 0, FFTWindow.Hamming);
+            audioSource.GetSpectrumData(playingAudioSpectrum, 0, window);
 
             if (audioSource.isPlaying)
             {

@@ -73,6 +73,7 @@ namespace LipSync
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("lipSyncMethod"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("audioSource"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("fftWindow"));
             EditorGUILayout.Space();
             if (targetLipSync.lipSyncMethod == ELipSyncMethod.Runtime)
             {

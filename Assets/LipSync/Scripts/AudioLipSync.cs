@@ -8,7 +8,7 @@ namespace LipSync
     {
         public ELipSyncMethod lipSyncMethod;
         public AudioSource audioSource;
-
+        public FFTWindow fftWindow = FFTWindow.Hamming;
         #region Fields for Baked LipSync
         public Animator targetAnimator;
         private int lastTimeSamples;
@@ -26,7 +26,7 @@ namespace LipSync
             {
                 if (Input.GetKeyDown(KeyCode.Space)) audioSource.Play();
 
-                recognizeResult = runtimeRecognizer.RecognizeByAudioSource(audioSource);
+                recognizeResult = runtimeRecognizer.RecognizeByAudioSource(audioSource, fftWindow);
                 UpdateForward();
             }
             else if (lipSyncMethod == ELipSyncMethod.Baked)
