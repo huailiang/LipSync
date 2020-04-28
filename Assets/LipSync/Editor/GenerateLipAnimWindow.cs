@@ -1,5 +1,4 @@
-﻿using LipSync;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
