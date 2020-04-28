@@ -7,7 +7,7 @@ namespace LipSync
     public class LipSyncRuntimeRecognizer : LipSyncRecognizer
     {
         private float[] playingAudioData;
-        private float[] playingAudioSpectrum;
+        public float[] playingAudioSpectrum;
 
         public LipSyncRuntimeRecognizer(ERecognizerLanguage recognizingLanguage, int windowSize, float amplitudeThreshold)
         {

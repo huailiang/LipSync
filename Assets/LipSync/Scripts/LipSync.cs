@@ -13,7 +13,6 @@ namespace LipSync
         public const string recdPat = "Assets/LipSync/Editor/recd.txt";
 
 
-        #region Fields for Runtime LipSync
         public ERecognizerLanguage recognizerLanguage;
         public SkinnedMeshRenderer targetBlendShapeObject;
         public string[] propertyNames = new string[MAX_BLEND_VALUE_COUNT];
@@ -33,7 +32,7 @@ namespace LipSync
         protected string recognizeResult;
         protected float[] targetBlendValues = new float[MAX_BLEND_VALUE_COUNT];
         protected float[] currentBlendValues = new float[MAX_BLEND_VALUE_COUNT];
-        #endregion
+        private AudioVisualization visualization;
 
 
         public void InitializeRecognizer()
@@ -53,6 +52,7 @@ namespace LipSync
                 propertyIndexs[i] = targetBlendShapeObject.sharedMesh.GetBlendShapeIndex(propertyNames[i]);
             }
             runtimeRecognizer = new LipSyncRuntimeRecognizer(recognizerLanguage, windowSize, amplitudeThreshold);
+            visualization = new AudioVisualization();
         }
 
         void OnValidate()
@@ -86,6 +86,7 @@ namespace LipSync
                     targetBlendShapeObject.SetBlendShapeWeight(propertyIndexs[k], Mathf.Lerp(propertyMinValue, propertyMaxValue, currentBlendValues[k]));
                 }
             }
+            visualization.Update(runtimeRecognizer.playingAudioSpectrum);
         }
     }
 }

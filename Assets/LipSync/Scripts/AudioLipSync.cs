@@ -9,6 +9,7 @@ namespace LipSync
         public ELipSyncMethod lipSyncMethod;
         public AudioSource audioSource;
         public FFTWindow fftWindow = FFTWindow.Hamming;
+       
         #region Fields for Baked LipSync
         public Animator targetAnimator;
         private int lastTimeSamples;
@@ -18,6 +19,7 @@ namespace LipSync
         void Start()
         {
             InitializeRecognizer();
+           // av = new AudioVisualization(runtimeRecognizer.playingAudioSpectrum);
         }
 
         void Update()

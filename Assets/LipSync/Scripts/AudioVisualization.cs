@@ -1,47 +1,49 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
-public class AudioVisualization : MonoBehaviour
+
+/*
+ * 在线声谱分析
+ *  https://bideyuanli.com/pp
+ */
+public class AudioVisualization
 {
-    AudioSource audioSource;
-    private const int band_cnt = 8;
-    float[] samples = new float[512];
+    const int band_cnt = 8;
+
     float[] freqBand = new float[band_cnt];
     float[] bandBuffer = new float[band_cnt];
     float[] bufferDecrease = new float[band_cnt];
     float[] freqBandHighest = new float[band_cnt];
     public static float[] AudioBandBuffer = new float[band_cnt];
-    
-    public float startScale, scaleMultiplier;
-    public MeshRenderer[] renders = new MeshRenderer[band_cnt];
+
+    Renderer[] renders = new Renderer[band_cnt];
     Material[] mat = new Material[band_cnt];
 
 
-    void Start()
+    public AudioVisualization()
     {
-        audioSource = GetComponent<AudioSource>();
-        for (int i = 0; i < band_cnt; i++)
+        GameObject go = GameObject.Find("AudioVisulization");
+        for (int i = 0; i < go.transform.childCount; i++)
         {
+            renders[i] = go.transform.GetChild(i).GetComponent<Renderer>();
             mat[i] = renders[i].material;
         }
     }
 
-    void Update()
+    public void Update(float[] samples)
     {
-        audioSource.GetSpectrumData(samples, 0, FFTWindow.Hamming);
-        MakeFrequencyBands();
+        MakeFrequencyBands(samples);
         BandBuffer();
         VisulizeBand();
     }
 
 
-    void MakeFrequencyBands()
+    void MakeFrequencyBands(float[] samples)
     {
         int index = 0;
         for (int i = 0; i < band_cnt; i++)
         {
             float average = 0;
-            int sampleCount = (int) Mathf.Pow(2, i + 1);
+            int sampleCount = (int)Mathf.Pow(2, i + 1);
             if (i == (band_cnt - 1))
             {
                 sampleCount += 2;
@@ -85,22 +87,21 @@ public class AudioVisualization : MonoBehaviour
             AudioBandBuffer[i] = bandBuffer[i] / freqBandHighest[i];
         }
     }
-    
-    
+
+
     void VisulizeBand()
     {
         for (int i = 0; i < band_cnt; i++)
         {
-            float y = (AudioVisualization.AudioBandBuffer[i]) * scaleMultiplier + startScale;
+            float v = Mathf.Max(0, AudioVisualization.AudioBandBuffer[i]);
+            float y = v * 8 + 0.1f;
             if (!float.IsNaN(y))
             {
                 Vector3 scale = renders[i].transform.localScale;
                 renders[i].transform.localScale = new Vector3(scale.x, y, scale.z);
-                float v = AudioVisualization.AudioBandBuffer[i];
                 Color color = new Color(v, v, v);
                 mat[i].SetColor("_EmissionColor", color);
             }
         }
-        
     }
 }
