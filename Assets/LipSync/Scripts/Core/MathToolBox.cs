@@ -128,8 +128,7 @@ namespace LipSync
                     break;
                 }
             }
-            if (peakValue.Length > 1)
-                Debug.Log("len: " + peakValue.Length);
+            Debug.Log("len: " + peakValue.Length);
         }
 
         /// <summary>

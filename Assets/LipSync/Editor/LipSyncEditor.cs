@@ -10,6 +10,8 @@ namespace LipSync
 
         protected void GUIVowel(LipSync sync)
         {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("fftWindow"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("recognizeText"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("recognizerLanguage"));
             string[] selectedVowels = null;
             switch (sync.recognizerLanguage)
@@ -73,7 +75,7 @@ namespace LipSync
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("lipSyncMethod"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("audioSource"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("fftWindow"));
+           
             EditorGUILayout.Space();
             if (targetLipSync.lipSyncMethod == ELipSyncMethod.Runtime)
             {

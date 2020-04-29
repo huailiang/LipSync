@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 namespace LipSync
 {
@@ -33,6 +33,8 @@ namespace LipSync
         protected float[] targetBlendValues = new float[MAX_BLEND_VALUE_COUNT];
         protected float[] currentBlendValues = new float[MAX_BLEND_VALUE_COUNT];
         private AudioVisualization visualization;
+        public Text recognizeText;
+
 
 
         public void InitializeRecognizer()
@@ -87,6 +89,8 @@ namespace LipSync
                 }
             }
             visualization.Update(runtimeRecognizer.playingAudioSpectrum);
+            if (recognizeText) recognizeText.text = recognizeResult;
         }
     }
+
 }

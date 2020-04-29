@@ -15,6 +15,7 @@ namespace LipSync
     {
         public StudioEventEmitter emiter;
         public bool save;
+        public FMOD.DSP_FFT_WINDOW fftWindow = FMOD.DSP_FFT_WINDOW.HANNING;
         private int rate;
         private float audioLen;
         FMOD.DSP m_FFTDsp;
@@ -52,7 +53,7 @@ namespace LipSync
         void InitDsp()
         {
             RuntimeManager.CoreSystem.createDSPByType(FMOD.DSP_TYPE.FFT, out m_FFTDsp);
-            m_FFTDsp.setParameterInt((int)FMOD.DSP_FFT.WINDOWTYPE, (int)FMOD.DSP_FFT_WINDOW.HANNING);
+            m_FFTDsp.setParameterInt((int)FMOD.DSP_FFT.WINDOWTYPE, (int)fftWindow);
             m_FFTDsp.setParameterInt((int)FMOD.DSP_FFT.WINDOWSIZE, windowSize);
             RuntimeManager.CoreSystem.getMasterChannelGroup(out master);
             var m_Result = master.addDSP(FMOD.CHANNELCONTROL_DSP_INDEX.HEAD, m_FFTDsp);
