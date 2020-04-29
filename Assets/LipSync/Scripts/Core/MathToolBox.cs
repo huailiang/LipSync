@@ -47,7 +47,6 @@ namespace LipSync
                 {
                     sumCos += data[k] * Mathf.Cos((Mathf.PI / data.Length) * m * (k + 0.5f));
                 }
-
                 result[m] = (sumCos > 0) ? sumCos : -sumCos;
             }
 
@@ -122,13 +121,11 @@ namespace LipSync
 
                     isIncreasing = false;
                 }
-
                 if (peakNum >= peakValue.Length)
                 {
                     break;
                 }
             }
-            Debug.Log("len: " + peakValue.Length);
         }
 
         /// <summary>
@@ -142,7 +139,7 @@ namespace LipSync
             float[] result = new float[size];
 
             float sum = 0.0f;
-            float mu = (float) (size - 1) / 2;
+            float mu = (float)(size - 1) / 2;
             for (int i = 0; i < size; ++i)
             {
                 float param = -((i - mu) * (i - mu)) / (2 * deviationSquare);
@@ -179,16 +176,16 @@ namespace LipSync
                     break;
                 case EWindowType.Hanning:
                     for (int i = 0; i < size; ++i)
-                        result[i] = (float) (0.5f * (1.0 - Mathf.Cos((2 * Mathf.PI * i) / size)));
+                        result[i] = (float)(0.5f * (1.0 - Mathf.Cos((2 * Mathf.PI * i) / size)));
                     break;
                 case EWindowType.BlackMan:
                     for (int i = 0; i < size; ++i)
-                        result[i] = (float) (0.42f - 0.5 * Mathf.Cos((2 * Mathf.PI * i) / size)) +
-                                    (float) (0.08 * Mathf.Cos(4 * Mathf.PI * i) / size);
+                        result[i] = (float)(0.42f - 0.5 * Mathf.Cos((2 * Mathf.PI * i) / size)) +
+                                    (float)(0.08 * Mathf.Cos(4 * Mathf.PI * i) / size);
                     break;
                 case EWindowType.BlackmanHarris:
                     for (int i = 0; i < size; ++i)
-                        result[i] = (float) ((0.35875 - 0.48829 * Mathf.Cos((2 * Mathf.PI * i) / size)) +
+                        result[i] = (float)((0.35875 - 0.48829 * Mathf.Cos((2 * Mathf.PI * i) / size)) +
                                              (0.14128 * Mathf.Cos(4 * Mathf.PI * i) / size) -
                                              (0.01168 * Mathf.Cos(6 * Mathf.PI * i / size)));
                     break;

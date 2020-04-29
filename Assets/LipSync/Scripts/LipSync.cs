@@ -89,7 +89,7 @@ namespace LipSync
                 }
             }
             visualization.Update(runtimeRecognizer.playingAudioSpectrum);
-            if (recognizeText) recognizeText.text = recognizeResult;
+            if (recognizeText) recognizeText.text = "RecognizeResult: " + recognizeResult;
         }
     }
 
