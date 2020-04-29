@@ -107,7 +107,7 @@ namespace LipSync
                         {
                             if (isPeakIncreasing)
                             {
-                                // Local largest peak found. 局部最大峰值
+                                // Local largest peak found. 局部最大峰值, 且所有峰值都是递增的
                                 peakValue[peakNum] = lastPeak;
                                 peakPosition[peakNum] = lastPeakPosition;
                                 ++peakNum;
@@ -128,10 +128,12 @@ namespace LipSync
                     break;
                 }
             }
+            if (peakValue.Length > 1)
+                Debug.Log("len: " + peakValue.Length);
         }
 
         /// <summary>
-        /// 生成高斯滤波器， 其是一种线性平滑滤波，低通滤波器，可以去除高斯噪声
+        /// 生成高斯滤波器， 其是一种线性平滑滤波，可以去除高斯噪声
         /// Make sure not to call this function too frequently. Recommend caching the result.
         /// </summary>
         /// <param name="size">Size of the filter.</param>
