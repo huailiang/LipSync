@@ -2,6 +2,8 @@
 
 
 /*
+ * 均衡器可视化
+ * https://baike.baidu.com/item/均衡器/3136238
  * 在线声谱分析
  *  https://bideyuanli.com/pp
  */
@@ -15,7 +17,7 @@ namespace LipSync
         float[] bandBuffer = new float[band_cnt];
         float[] bufferDecrease = new float[band_cnt];
         float[] freqBandHighest = new float[band_cnt];
-        public static float[] AudioBandBuffer = new float[band_cnt];
+        float[] AudioBandBuffer = new float[band_cnt];
 
         Renderer[] renders = new Renderer[band_cnt];
         Material[] mat = new Material[band_cnt];
@@ -95,13 +97,13 @@ namespace LipSync
         {
             for (int i = 0; i < band_cnt; i++)
             {
-                float v = Mathf.Max(0, AudioVisualization.AudioBandBuffer[i]);
+                float v = Mathf.Max(0, AudioBandBuffer[i]);
                 float y = v * 8 + 0.1f;
                 if (!float.IsNaN(y))
                 {
                     Vector3 scale = renders[i].transform.localScale;
                     renders[i].transform.localScale = new Vector3(scale.x, y, scale.z);
-                    Color color = new Color(v, v, v);
+                    Color color = new Color(0, 0, v);
                     mat[i].SetColor("_EmissionColor", color);
                 }
             }

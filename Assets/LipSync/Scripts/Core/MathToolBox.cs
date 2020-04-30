@@ -96,9 +96,9 @@ namespace LipSync
                 }
                 else
                 {
-                    if (isIncreasing)
+                    if (isIncreasing) 
                     {
-                        if (lastPeak < data[i]) // Peak found. 找到峰值
+                        if (lastPeak < data[i]) // Peak found. 找到峰值, 一般fft窗口有两三个峰值
                         {
                             isPeakIncreasing = true;
                         }
