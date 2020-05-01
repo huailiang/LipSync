@@ -11,9 +11,9 @@ namespace LipSync
         protected const int FORMANT_COUNT = 1;
 
         protected string[] vowelsByFormantJP = { "i", "u", "e", "o", "a" };
-        protected float[] vowelFormantFloorJP = { 0.0f, 250.0f, 300.0f, 450.0f, 600.0f };
+        protected float[] vowelFormantFloorJP = { 0.0f, 500.0f, 600.0f, 900.0f, 1200.0f };
         protected string[] vowelsByFormantCN = { "i", "v", "u", "e", "o", "a" };
-        protected float[] vowelFormantFloorCN = { 0.0f, 100.0f, 250.0f, 300.0f, 450.0f, 600.0f };
+        protected float[] vowelFormantFloorCN = { 0.0f, 200.0f, 500.0f, 600.0f, 900.0f, 1200.0f };
 
         protected string[] currentVowels;
         protected float[] currentVowelFormantCeilValues;

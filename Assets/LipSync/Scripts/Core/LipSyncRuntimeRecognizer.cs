@@ -26,7 +26,7 @@ namespace LipSync
             {
                 MathToolBox.Convolute(playingAudioSpectrum, gaussianFilter, MathToolBox.EPaddleType.Repeat, smoothedAudioSpectrum);
                 MathToolBox.FindLocalLargestPeaks(smoothedAudioSpectrum, peakValues, peakPositions);
-                frequencyUnit = sampleRate / 2 / windowSize;
+                frequencyUnit = sampleRate / windowSize;
                 for (int i = 0; i < formantArray.Length; ++i)
                 {
                     formantArray[i] = peakPositions[i] * frequencyUnit;

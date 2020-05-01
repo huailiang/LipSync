@@ -80,7 +80,7 @@ namespace LipSync
         /// <param name="data">Source data.</param>
         /// <param name="peakValue">Array to store peak values.</param>
         /// <param name="peakPosition">Array to store peak values' positions.</param>
-        public static void FindLocalLargestPeaks(float[] data, float[] peakValue, int[] peakPosition)
+        public static void FindLocalLargestPeaks(float[] data,  float[] peakValue, int[] peakPosition)
         {
             int peakNum = 0;
             float lastPeak = 0.0f;
@@ -88,6 +88,7 @@ namespace LipSync
             bool isIncreasing = false;
             bool isPeakIncreasing = false;
 
+            string str = "";
             for (int i = 0; i < data.Length - 1; ++i)
             {
                 if (data[i] < data[i + 1])
@@ -96,8 +97,9 @@ namespace LipSync
                 }
                 else
                 {
-                    if (isIncreasing) 
+                    if (isIncreasing)
                     {
+                        str +=  (i * 86) + "-";
                         if (lastPeak < data[i]) // Peak found. 找到峰值, 一般fft窗口有两三个峰值
                         {
                             isPeakIncreasing = true;
@@ -121,11 +123,13 @@ namespace LipSync
 
                     isIncreasing = false;
                 }
+               
                 if (peakNum >= peakValue.Length)
                 {
                     break;
                 }
             }
+            Debug.Log(str + " " + peakNum + "  " + peakPosition[0] * 86);
         }
 
         /// <summary>
