@@ -87,8 +87,7 @@ namespace LipSync
             int lastPeakPosition = 0;
             bool isIncreasing = false;
             bool isPeakIncreasing = false;
-
-            string str = "";
+            
             for (int i = 0; i < data.Length - 1; ++i)
             {
                 if (data[i] < data[i + 1])
@@ -99,8 +98,7 @@ namespace LipSync
                 {
                     if (isIncreasing)
                     {
-                        str +=  (i * 86) + "-";
-                        if (lastPeak < data[i]) // Peak found. 找到峰值, 一般fft窗口有两三个峰值
+                        if (lastPeak < data[i]) // Peak found. 
                         {
                             isPeakIncreasing = true;
                         }
@@ -108,7 +106,7 @@ namespace LipSync
                         {
                             if (isPeakIncreasing)
                             {
-                                // Local largest peak found. 局部最大峰值, 且所有峰值都是递增的
+                                // Local largest peak found. 
                                 peakValue[peakNum] = lastPeak;
                                 peakPosition[peakNum] = lastPeakPosition;
                                 ++peakNum;
@@ -129,7 +127,6 @@ namespace LipSync
                     break;
                 }
             }
-            Debug.Log(str + " " + peakNum + "  " + peakPosition[0] * 86);
         }
 
         /// <summary>

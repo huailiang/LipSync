@@ -29,7 +29,7 @@ namespace LipSync
         protected float[] formantArray;
         protected float[] gaussianFilter;
 
-        public void Init(ERecognizerLanguage recognizingLanguage, int windowSize, float amplitudeThreshold)
+        protected void Init(ERecognizerLanguage recognizingLanguage, int windowSize, float amplitudeThreshold)
         {
             switch (recognizingLanguage)
             {
