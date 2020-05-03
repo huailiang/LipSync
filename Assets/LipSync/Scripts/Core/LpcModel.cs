@@ -8,11 +8,11 @@ public class LpcModel
     /// Uses the Levinson-Durbin recursion algorithm
     /// - Returns: `modelLength` + 1 autocorrelation coefficients for an all-pole model
     /// the first coefficient is 1.0 for perfect autocorrelation with zero offset
-    double[] estimateLpcCoefficients(float[] samples, int sampleRate, int modelLength)
+    public double[] EstimateLpcCoefficients(float[] samples, int sampleRate, int modelLength)
     {
         int len = modelLength;
-        double[] correlations = new double[len];
-        double[] coefficients = new double[len];
+        double[] correlations = new double[len + 1];
+        double[] coefficients = new double[len + 1];
         if (samples.Length <= len)
         {
             double[] ret = new double[len + 1];
@@ -27,7 +27,7 @@ public class LpcModel
         for (int delay = 0; delay <= len; delay++)
         {
             double correlationSum = 0.0;
-            for (int sampleIndex = 0; sampleIndex < samples.Length - delay; sampleIndex++)
+            for (int sampleIndex = 0; sampleIndex < len - delay; sampleIndex++)
             {
                 correlationSum += samples[sampleIndex] * samples[sampleIndex + delay];
             }
@@ -69,7 +69,7 @@ public class LpcModel
     /// - Parameter samplingRate: the sampling frequency in Hz
     /// - Parameter frequencies: the frequencies whose response you'd like to know
     /// - Returns: a response from 0 to 1 for each frequency you are interrogating
-    double[] synthesizeResponseForLPC(double[] coefficients, int samplingRate, int[] frequencies)
+    public double[] SynthesizeResponseForLPC(double[] coefficients, int samplingRate, int[] frequencies)
     {
         double[] retval = new double[frequencies.Length];
         int index = 0;
@@ -93,7 +93,7 @@ public class LpcModel
     /// Laguerre's method to find one root of the given complex polynomial
     /// Call this method repeatedly to find all the complex roots one by one
     /// Algorithm from Numerical Recipes in C by Press/Teutkolsky/Vetterling/Flannery
-    Complex laguerreRoot(Complex[] polynomial, Complex guess)
+    private Complex LaguerreRoot(Complex[] polynomial, Complex guess)
     {
         var m = polynomial.Length - 1;
         var MR = 8;
@@ -140,7 +140,8 @@ public class LpcModel
                 gp = gm;
             }
 
-            dx = Math.Max(abp, abm) > 0.0 ? m / gp
+            dx = Math.Max(abp, abm) > 0.0
+                ? m / gp
                 : (1 + abx) * new Complex(Mathf.Cos(iteration), Mathf.Sin(iteration));
             x1 = x - dx;
             if (x == x1)
@@ -168,7 +169,7 @@ public class LpcModel
     /// - Parameter polynomial: coefficients of the input polynomial
     /// - Note: Does not implement root polishing, so accuracy may be impacted
     /// - Note: May include duplicated roots/formants
-    double[] findFormants(Complex[] polynomial, int rate)
+    public double[] FindFormants(Complex[] polynomial, int rate)
     {
         var EPS = 2.0e-6;
 
@@ -177,7 +178,7 @@ public class LpcModel
         var modelOrder = polynomial.Length - 1;
         for (int j = modelOrder; j >= 1; j--)
         {
-            var root = laguerreRoot(deflatedPolynomial, Complex.zero);
+            var root = LaguerreRoot(deflatedPolynomial, Complex.zero);
 
             // If imaginary part is very small, ignore it
             if (Math.Abs(root.imag) < 2.0 * EPS * Math.Abs(root.real))
@@ -200,7 +201,7 @@ public class LpcModel
         Complex[] polishedRoots = new Complex[polynomial.Length];
         for (int i = 0; i < polynomial.Length; i++)
         {
-            polishedRoots[i] = laguerreRoot(polynomial, roots[i]);
+            polishedRoots[i] = LaguerreRoot(polynomial, roots[i]);
         }
 
         //// Find real frequencies corresponding to all roots

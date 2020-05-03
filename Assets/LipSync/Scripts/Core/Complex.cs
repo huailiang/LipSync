@@ -1,6 +1,6 @@
 ﻿using System;
 
-struct Complex
+public struct Complex
 {
     public bool Equals(Complex other)
     {
@@ -16,7 +16,7 @@ struct Complex
     {
         unchecked
         {
-            return (this.real.GetHashCode() * 397) ^ this.imag.GetHashCode();
+            return (real.GetHashCode() * 397) ^ imag.GetHashCode();
         }
     }
 
@@ -45,6 +45,12 @@ struct Complex
             double v = real * real + imag * imag;
             return Math.Sqrt(v);
         }
+        set
+        {
+            var f = value / abs;
+            real = real * f;
+            imag = imag * f;
+        }
     }
 
     // If no errors occur, returns the phase angle of z in the interval [−π; π].
@@ -54,6 +60,33 @@ struct Complex
         {
             return Math.Atan2(imag, real);
         }
+        set
+        {
+            var m = abs;
+            real = m * Math.Cos(value);
+            imag = m * Math.Sin(value);
+        }
+    }
+
+    public double norm
+    {
+        get
+        {
+            return real * real + imag * imag;
+        }
+    }
+
+    public Complex conj
+    {
+        get
+        {
+            return new Complex(real, -imag);
+        }
+    }
+
+    public static Complex operator +(double l, Complex r)
+    {
+        return new Complex(l + r.real, l + r.imag);
     }
 
     public static Complex operator +(Complex l, Complex r)
@@ -61,14 +94,31 @@ struct Complex
         return new Complex(l.real + r.real, l.imag + r.imag);
     }
 
+    public static Complex operator +(Complex l, double r)
+    {
+        return new Complex(l.real + r, l.imag);
+    }
+
     public static Complex operator -(Complex l, Complex r)
     {
         return new Complex(l.real - r.real, l.imag - r.imag);
     }
 
+    public static Complex operator -(Complex l, double r)
+    {
+        return new Complex(l.real - r, l.imag);
+    }
+
     public static Complex operator *(Complex l, Complex r)
     {
-        return new Complex(l.real * r.real, l.imag * r.imag);
+        var real = l.real * r.real - l.imag * r.imag;
+        var imag = l.real * r.imag + l.imag * r.real;
+        return new Complex(real, imag);
+    }
+
+    public static Complex operator *(Complex r, double ax)
+    {
+        return new Complex(ax * r.real, ax * r.imag);
     }
 
     public static Complex operator *(double ax, Complex r)
@@ -78,12 +128,18 @@ struct Complex
 
     public static Complex operator /(Complex l, Complex r)
     {
-        return new Complex(l.real / r.real, l.imag / r.imag);
+        return (l.real * r.conj) / r.norm;
+    }
+
+    public static Complex operator /(Complex l, double r)
+    {
+        return new Complex(l.real / r, l.imag / r);
     }
 
     public static Complex operator /(double l, Complex r)
     {
-        return new Complex(l / r.real, l / r.imag);
+        var cpx = new Complex(l, 0);
+        return cpx / r;
     }
 
     public static bool operator ==(Complex l, Complex r)
@@ -94,5 +150,10 @@ struct Complex
     public static bool operator !=(Complex l, Complex r)
     {
         return l.real != r.real || l.imag != r.imag;
+    }
+
+    public override string ToString()
+    {
+        return $"{real} {imag}i";
     }
 }
