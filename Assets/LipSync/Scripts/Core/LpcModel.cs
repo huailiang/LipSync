@@ -2,115 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class LpcModel
 {
-    struct Complex
-    {
-        public bool Equals(Complex other)
-        {
-            return real.Equals(other.real) && imag.Equals(other.imag);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Complex other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (real.GetHashCode() * 397) ^ imag.GetHashCode();
-            }
-        }
-
-        public double real, imag;
-
-        private static readonly Complex zeroVector = new Complex(0.0f, 0.0f);
-
-        public Complex(double real, double imag)
-        {
-            this.real = real;
-            this.imag = imag;
-        }
-
-        public static Complex zero
-        {
-            get
-            {
-                return Complex.zeroVector;
-            }
-        }
-
-        public double abs
-        {
-            get
-            {
-                double v = real * real + imag * imag;
-                return Math.Sqrt(v);
-            }
-        }
-
-        // If no errors occur, returns the phase angle of z in the interval [−π; π].
-        public double arg
-        {
-            get
-            {
-                return Math.Atan2(imag, real);
-            }
-        }
-
-        public static Complex operator +(Complex l, Complex r)
-        {
-            return new Complex(l.real + r.real, l.imag + r.imag);
-        }
-
-        public static Complex operator -(Complex l, Complex r)
-        {
-            return new Complex(l.real - r.real, l.imag - r.imag);
-        }
-
-        public static Complex operator *(Complex l, Complex r)
-        {
-            return new Complex(l.real * r.real, l.imag * r.imag);
-        }
-
-        public static Complex operator *(double ax, Complex r)
-        {
-            return new Complex(ax * r.real, ax * r.imag);
-        }
-
-        public static Complex operator /(Complex l, Complex r)
-        {
-            return new Complex(l.real / r.real, l.imag / r.imag);
-        }
-
-        public static Complex operator /(double l, Complex r)
-        {
-            return new Complex(l / r.real, l / r.imag);
-        }
-
-        public static bool operator ==(Complex l, Complex r)
-        {
-            return l.real == r.real && l.imag == r.imag;
-        }
-
-        public static bool operator !=(Complex l, Complex r)
-        {
-            return l.real != r.real || l.imag != r.imag;
-        }
-    }
-
+    /// Estimate LPC polynomial coefficients from the signal
+    /// Uses the Levinson-Durbin recursion algorithm
+    /// - Returns: `modelLength` + 1 autocorrelation coefficients for an all-pole model
+    /// the first coefficient is 1.0 for perfect autocorrelation with zero offset
     double[] estimateLpcCoefficients(float[] samples, int sampleRate, int modelLength)
     {
-        double[] correlations = new double[modelLength];
-        double[] coefficients = new double[modelLength];
-        double modelError;
-        if (samples.Length < modelLength)
+        int len = modelLength;
+        double[] correlations = new double[len];
+        double[] coefficients = new double[len];
+        if (samples.Length <= len)
         {
-            double[] ret = new double[modelLength + 1];
-            for (int i = 0; i < modelLength + 1; i++)
+            double[] ret = new double[len + 1];
+            for (int i = 0; i <= len; i++)
             {
                 ret[i] = 1;
             }
@@ -118,7 +24,7 @@ public class LpcModel
             return ret;
         }
 
-        for (int delay = 0; delay < modelLength; delay++)
+        for (int delay = 0; delay <= len; delay++)
         {
             double correlationSum = 0.0;
             for (int sampleIndex = 0; sampleIndex < samples.Length - delay; sampleIndex++)
@@ -129,29 +35,40 @@ public class LpcModel
             correlations[delay] = correlationSum;
         }
 
-        modelError = correlations[0];
+        var modelError = correlations[0];
         coefficients[0] = 1.0;
 
-        for (int delay = 1; delay < modelLength; delay++)
+        for (int delay = 1; delay <= modelLength; delay++)
         {
             var rcNum = 0.0;
-            for (int i = 1; i < delay; i++)
+            for (int i = 1; i <= delay; i++)
             {
                 rcNum -= coefficients[delay - i] * correlations[i];
             }
 
             coefficients[delay] = rcNum / modelError;
-            //
-            // for (int i = 0; i < UPPER; i++)
-            // {
-            //     
-            // }
+
+            for (int i = 1; i < delay / 2; i++)
+            {
+                var pci = coefficients[i] + coefficients[delay] * coefficients[delay - i];
+                var pcki = coefficients[delay - i] + coefficients[delay] * coefficients[i];
+                coefficients[i] = pci;
+                coefficients[delay - 1] = pcki;
+            }
+
+            modelError *= 1.0 - coefficients[delay] * coefficients[delay];
         }
 
         return coefficients;
     }
 
 
+    /// Synthesize the frequency response for the estimated LPC coefficients
+    ///
+    /// - Parameter coefficients: an all-pole LPC model
+    /// - Parameter samplingRate: the sampling frequency in Hz
+    /// - Parameter frequencies: the frequencies whose response you'd like to know
+    /// - Returns: a response from 0 to 1 for each frequency you are interrogating
     double[] synthesizeResponseForLPC(double[] coefficients, int samplingRate, int[] frequencies)
     {
         double[] retval = new double[frequencies.Length];
@@ -173,7 +90,9 @@ public class LpcModel
         return retval;
     }
 
-
+    /// Laguerre's method to find one root of the given complex polynomial
+    /// Call this method repeatedly to find all the complex roots one by one
+    /// Algorithm from Numerical Recipes in C by Press/Teutkolsky/Vetterling/Flannery
     Complex laguerreRoot(Complex[] polynomial, Complex guess)
     {
         var m = polynomial.Length - 1;
@@ -221,8 +140,7 @@ public class LpcModel
                 gp = gm;
             }
 
-            dx = Math.Max(abp, abm) > 0.0
-                ? m / gp
+            dx = Math.Max(abp, abm) > 0.0 ? m / gp
                 : (1 + abx) * new Complex(Mathf.Cos(iteration), Mathf.Sin(iteration));
             x1 = x - dx;
             if (x == x1)
@@ -245,6 +163,11 @@ public class LpcModel
         return new Complex();
     }
 
+    /// Use Laguerre's method to find roots.
+    ///
+    /// - Parameter polynomial: coefficients of the input polynomial
+    /// - Note: Does not implement root polishing, so accuracy may be impacted
+    /// - Note: May include duplicated roots/formants
     double[] findFormants(Complex[] polynomial, int rate)
     {
         var EPS = 2.0e-6;
@@ -281,13 +204,13 @@ public class LpcModel
         }
 
         //// Find real frequencies corresponding to all roots
-        List<double> formantFrequencies=new List<double>();
+        List<double> formantFrequencies = new List<double>();
         for (int i = 0; i < polishedRoots.Length; i++)
         {
             var t = polishedRoots[i].arg * rate / Math.PI / 2;
             formantFrequencies.Add(t);
         }
-        
+
         formantFrequencies.Sort();
         return formantFrequencies.ToArray();
     }
