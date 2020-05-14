@@ -19,10 +19,8 @@ LipSync没有借助第三方插件，所有的逻辑都在插件内部得以实�
 *	分析噪声过于严重的语音数据。
 *	分辨某一段声音是语音还是和语音不相关的其他声音。
 
-另外，你所获得的LipSync的Unity Package或者项目压缩包中，应该会包含2个文件夹LipSync和UnityChan。LipSync文件夹中的内容是本插件的主体部分，而UnityChan文件夹中的内容并不是本插件的一部分，它是为了演示LipSync的效果而附带的一套模型资源。她其实是Unity Technology Japan为Unity开发的一个官方形象。如果你想进一步了解UnityChan，可以在这里获得她的信息：
-http://unity-chan.com/
+LipSync文件夹中的内容是本插件的主体部分，而UnityChan文件夹中的内容并不是本插件的一部分，它是为了演示LipSync的效果而附带的一套模型资源。她其实是Unity Technology Japan为Unity开发的一个官方形象。如果你想进一步了解UnityChan，可以在这里获得她的信息：http://unity-chan.com/
 
-了解了以上信息后，你就可以准备开始使用LipSync了。
 
 ## 使用LipSync前需要做什么准备？
 
@@ -41,31 +39,15 @@ __2) 带有口型BlendShape的3D模型。__
 
 ## 如何使用LipSync？
 
-就让我们以UnityChan模型为素材，学习如何使用LipSync。
-首先新建一个空场景，并在场景中摆放好摄像机与灯光的位置。如果你愿意，可以在场景中搭出一个小房间。然后找到这一个Prefab：LipSync/Demo/Prefabs/UnityChanTemplate.prefab。把它放置到场景中，并调整好它与摄像机的相对位置。
+你需要找到你的模型上带有口型BlendShape的那个GameObject。它在Unity里表现为SkinnedMeshRenderer组件。以UnityChan模型为例。把这个GameObject赋予到LipSync的TargetBlendShape上。为了阐述方便，后文我们就把这个“带有口型BlendShape的那个GameObject”称之为“目标对象”。
 
-这个Prefab上已经挂载了一些让UnityChan更“生动活泼”的组件，它们与LipSync的功能无关，你可以就这样放着不管。
-接下来，找到这个脚本：LipSync/Scripts/LipSync.cs，并把它挂载到刚才放置好的Prefab上。此时你应该在Inspector中看到图2中的内容。从中可以看到3个空缺项AudioSource，TargetBlendShape和VowelPropertyNames，正好对应前文所说的语音数据的来源、目标对象以及属性名。
- 
-<br><img src='.github/im2.png'><br>
-*图2 LipSync脚本组件*
-
-先从AudioSource开始。在刚才的Prefab上添加一个AudioSource组件。如果你想把AudioSource加到其他的GameObject上，也不是不可以。为这个AudioSource设置一个AudioClip，你可以从UnityChan/Voice/Resources中任选一个，也可以使用自己准备的语音文件。然后，把这个挂载着AudioSource的物体赋予到LipSync组件的AudioSource上。
- 
- <br><img src='.github/im3.png'><br>
-*图3 UnityChanTemplate中包含口型BlendShape的GameObject*
-
-接下来是TargetBlendShape。你需要找到你的模型上带有口型BlendShape的那个GameObject。它在Unity里表现为SkinnedMeshRenderer组件。以UnityChan模型为例，需要找的GameObject位于图3中的位置。把这个GameObject赋予到LipSync的TargetBlendShape上。为了阐述方便，后文我们就把这个“带有口型BlendShape的那个GameObject”称之为“目标对象”。
-
-这里先观察一下这个目标对象。如图4中所示，展开BlendShapes项，可以看到它提供的BlendShapes属性值。这个UnityChan模型中提供的口型BlendShape的属性值即为：blendShapes1.MTH_A，blendShapes1.MTH_I，blendShapes1.MTH_U，blendShapes1.MTH_E，blendShapes1.MTH_O，对应的正好是日语中的5个元音。接下来就把这5个属性名一一对应地填到LipSync中的VowelPropertyNames当中。
+这里先观察一下这个目标对象，展开BlendShapes项，可以看到它提供的BlendShapes属性值。这个UnityChan模型中提供的口型BlendShape的属性值即为：blendShapes1.MTH_A，blendShapes1.MTH_I，blendShapes1.MTH_U，blendShapes1.MTH_E，blendShapes1.MTH_O，对应的正好是日语中的5个元音。接下来就把这5个属性名一一对应地填到LipSync中的VowelPropertyNames当中。
  
  <br><img src='.github/im4.png'><br>
-*图4 UnityChan具有的脸部BlendShape*
 
-至此，你的LipSync组件应该变得像图5所示。
+至此，你的LipSync组件应该变得像如图所示。
  
  <br><img src='.github/im5.png'><br>
-*图5 LipSync设置完毕后的状态*
 
 最后可以进行一些设置。首先是BlendShape属性值共用的最小值和最大值，即PropertyMinValue和PropertyMaxValue，默认值是0和100，你可以根据实际情况进行调整。其次是一些进阶选项，可以看到相较图1，图5中的“Advanced Options”被展开了。
 WindowSize的含义是窗口大小，它决定一次性从整个语音数据中截取多长的语音帧进行分析。它必须是2的幂。一般来说，512或1024是比较令人满意的取值，前者性能更加而识别精度稍差，后者则反之。低于512的情况下，虽然性能提升比较明显，但识别精度会变得很低；高于1024的情况下，性能会变得非常差，然而识别精度也不会提高很多。
@@ -80,27 +62,24 @@ MoveTowardsSpeed的含义是平滑过渡的速度。语音帧与语音帧之间�
 
 以上介绍的都是在运行时即时地进行口型匹配。而在这一类动画相关的技术中，有一个很常用的处理方式——烘焙。以一定的灵活性为代价，把动画信息在开发阶段全部准备好，在运行时直接读取，这样便可在运行时省去所有的识别运算，从而大幅提高性能。LipSync也提供了这样的功能。
 
-首先，先把LipSync组件中的LipSyncMethod切换为Baked，此时你会看到图7的内容。
+首先，先把LipSync组件中的LipSyncMethod切换为Baked，此时你会看到如图的内容。
  
  <br><img src='.github/im7.png'><br>
-*图7 Baked模式下的LipSync*
 
-点击LipSync Baker按钮，会出现图8所示界面。
+点击LipSync Baker按钮，会出现如图所示界面。
  
  <br><img src='.github/im8.png'><br>
-*图8 LipSync Baker界面*
 
 在这里，你可以导入一个文件夹里的语音文件，并把它们的口型匹配数据烘焙到本地文件上。这里利用了Unity的动画系统，输出的文件就是AnimationClip与AnimatorController。
-先从AudioClipInputFolderPath开始，这里点击“Browse...”按钮可以选择一个路径。当然，你只能选择位于Assets文件夹内的路径。之后，LipSync会搜索该文件夹内所有的音频文件，并记录到AudioClipList中，如图9。
+先从AudioClipInputFolderPath开始，这里点击“Browse...”按钮可以选择一个路径。当然，你只能选择位于Assets文件夹内的路径。之后，LipSync会搜索该文件夹内所有的音频文件，并记录到AudioClipList中。
  
  <br><img src='.github/im10.png'><br>
-图 9 导入完毕后的AudioClipList
 
 右边部分的设置，与实时模式下的设置基本相同，就是多出了两项AnimatorName和TargetRelativePath。AnimatorName是烘焙完毕后，生成的Animator的名称。你可以自行进行指定。TargetRelativePath是为了应对特殊情况，一般来说生成的Animator会被挂载在目标对象上，但是可能会因为某些原因，导致只能挂载在它的某一个父级GameObject。这个TargetRelativePath就是用来指定相对路径用的。通常情况下不会用到它，这里我们选择不填写。
 另外，AdvancedOptions里也多出了一项ShiftStepSize，这决定了采样时数据帧与数据帧之间的间隔。在实时匹配时，由于LipSync可以直接采样当前帧（渲染意义上）正在播放的声音片段，所以不需要这一个属性，而烘焙时声音并没有被真正播放，所以需要指定这个值。一般来说，取窗口长度的一半可以得到非常精确的结果，小于这个值的意义不大，烘焙时间却会增长。
 全部设置完毕后，你可以点击“Bake”按钮。选择一个Assets文件夹内的路径，即可开始烘焙工作。烘焙工作需要的时间比较长，限于目前采用的计算方法，可能会长于语音文件本身的时间长度，请耐心等待一下。经过漫长的等待后，你可以在刚才指定的路径中找到烘焙结果。
 
-然后，在目标对象上新建一个Animator组件，并把生成的AnimatorController赋予到上面。回到LipSync组件上，将目标对象赋予到TargetAnimator上。最后应该像图11这样。
+然后，在目标对象上新建一个Animator组件，并把生成的AnimatorController赋予到上面。回到LipSync组件上，将目标对象赋予到TargetAnimator上。最后应该像下图这样。
 
    <br><img src='.github/im12.png'><br>
 
