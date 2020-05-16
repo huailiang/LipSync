@@ -8,39 +8,37 @@ public class LpcModel
     /// Uses the Levinson-Durbin recursion algorithm
     /// - Returns: `modelLength` + 1 autocorrelation coefficients for an all-pole model
     /// the first coefficient is 1.0 for perfect autocorrelation with zero offset
-    public double[] EstimateLpcCoefficients(float[] samples, int sampleRate, int modelLength)
+    public float[] EstimateLpcCoefficients(float[] samples, int sampleRate, int modelLength)
     {
         int len = modelLength;
-        double[] correlations = new double[len + 1];
-        double[] coefficients = new double[len + 1];
+        float[] correlations = new float[len + 1];
+        float[] coefficients = new float[len + 1];
         if (samples.Length <= len)
         {
-            double[] ret = new double[len + 1];
+            float[] ret = new float[len + 1];
             for (int i = 0; i <= len; i++)
             {
                 ret[i] = 1;
             }
-
             return ret;
         }
 
         for (int delay = 0; delay <= len; delay++)
         {
-            double correlationSum = 0.0;
+            float correlationSum = 0.0f;
             for (int sampleIndex = 0; sampleIndex < len - delay; sampleIndex++)
             {
                 correlationSum += samples[sampleIndex] * samples[sampleIndex + delay];
             }
-
             correlations[delay] = correlationSum;
         }
 
         var modelError = correlations[0];
-        coefficients[0] = 1.0;
+        coefficients[0] = 1.0f;
 
         for (int delay = 1; delay <= modelLength; delay++)
         {
-            var rcNum = 0.0;
+            var rcNum = 0.0f;
             for (int i = 1; i <= delay; i++)
             {
                 rcNum -= coefficients[delay - i] * correlations[i];
@@ -55,10 +53,8 @@ public class LpcModel
                 coefficients[i] = pci;
                 coefficients[delay - 1] = pcki;
             }
-
-            modelError *= 1.0 - coefficients[delay] * coefficients[delay];
+            modelError *= 1.0f - coefficients[delay] * coefficients[delay];
         }
-
         return coefficients;
     }
 
@@ -69,9 +65,9 @@ public class LpcModel
     /// - Parameter samplingRate: the sampling frequency in Hz
     /// - Parameter frequencies: the frequencies whose response you'd like to know
     /// - Returns: a response from 0 to 1 for each frequency you are interrogating
-    public double[] SynthesizeResponseForLPC(double[] coefficients, int samplingRate, int[] frequencies)
+    public float[] SynthesizeResponseForLPC(float[] coefficients, int samplingRate, int[] frequencies)
     {
-        double[] retval = new double[frequencies.Length];
+        float[] retval = new float[frequencies.Length];
         int index = 0;
         foreach (var frequency in frequencies)
         {
@@ -82,11 +78,9 @@ public class LpcModel
                 var c = coefficients[i];
                 response += new Complex(c < 0 ? -c : c, i * radians);
             }
-
-            double v = 20 * Mathf.Log10((float) (1.0 / response.abs));
+            float v = 20 * Mathf.Log10((float) (1.0 / response.abs));
             retval[index++] = v;
         }
-
         return retval;
     }
 
@@ -111,7 +105,6 @@ public class LpcModel
             d = new Complex(0.0, 0.0);
             f = new Complex(0.0, 0.0);
             abx = x.abs;
-
 
             for (int j = m - 1; j >= 0; j--)
             {
@@ -172,7 +165,6 @@ public class LpcModel
     public double[] FindFormants(Complex[] polynomial, int rate)
     {
         var EPS = 2.0e-6;
-
         List<Complex> roots = new List<Complex>();
         var deflatedPolynomial = polynomial;
         var modelOrder = polynomial.Length - 1;

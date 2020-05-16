@@ -89,9 +89,16 @@ namespace LipSync
         {
             int i = 0;
             float a = 0.67f;
+            var lpc = new LpcModel();
             while (i < splitting.Count())
             {
                 var FL = PreEmphasis(splitting[i], a);
+                var w = MathToolBox.GenerateWindow(window, MathToolBox.EWindowType.Hamming);
+                for (int j = 0; j < window; j++)
+                {
+                    FL[i] = FL[i] * w[i];
+                }
+                FL = lpc.EstimateLpcCoefficients(FL, fs, 2 + fs / 1000);
                 i++;
             }
         }

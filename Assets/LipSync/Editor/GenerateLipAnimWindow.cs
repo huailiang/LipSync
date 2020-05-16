@@ -65,7 +65,6 @@ namespace XEditor
             {
                 Generate();
             }
-
             GUILayout.Space(8);
             sclip = EditorGUILayout.ObjectField("Clip", sclip, typeof(AnimationClip), true) as AnimationClip;
             if (sclip)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -75,10 +76,10 @@ namespace LipSync
                                 switch (recognizerLanguage)
                                 {
                                     case ERecognizerLanguage.Japanese:
-                                        currentVowels = AudioLipSync.vowelsJP;
+                                        currentVowels = LipSync.vowelsJP;
                                         break;
                                     case ERecognizerLanguage.Chinese:
-                                        currentVowels = AudioLipSync.vowelsCN;
+                                        currentVowels = LipSync.vowelsCN;
                                         break;
                                 }
                                 for (int i = 0; i < currentVowels.Length; ++i)
@@ -120,7 +121,7 @@ namespace LipSync
         {
             string tempPath = EditorUtility.OpenFolderPanel("Select a asset folder containing AudioClips",
                 Application.dataPath, "");
-            if (tempPath.IndexOf(Application.dataPath, 0) == 0)
+            if (tempPath.IndexOf(Application.dataPath, 0, StringComparison.Ordinal) == 0)
             {
                 audioClipInputPath = tempPath.Substring(Application.dataPath.Length - "Assets".Length);
 
@@ -173,7 +174,7 @@ namespace LipSync
                 {
                     string path = "";
                     path = EditorUtility.SaveFolderPanel("Save generated Animator to...", Application.dataPath, "");
-                    if (path.IndexOf(Application.dataPath, 0) == 0)
+                    if (path.IndexOf(Application.dataPath, 0, StringComparison.Ordinal) == 0)
                     {
                         path = path.Substring(Application.dataPath.Length - "Assets".Length);
                         if (AssetDatabase.IsValidFolder(path + "/GeneratedClips") == false)
@@ -205,7 +206,6 @@ namespace LipSync
                             string[] recognizeResult = recognizer.RecognizeAllByAudioClip(audioClipToBake[j]);
                             float timeUnit = 1024.0f * (1.0f / (float) audioClipToBake[j].frequency);
 
-                            float blendValuesSum = 0.0f;
                             for (int k = 0; k < recognizeResult.Length; ++k)
                             {
                                 for (int kk = 0; kk < currentVowels.Length; ++kk)
@@ -216,12 +216,6 @@ namespace LipSync
                                 {
                                     targetBlendValues[vowelToIndexDict[recognizeResult[k]]] = 1.0f;
                                 }
-                                blendValuesSum = 0.0f;
-                                for (int kk = 0; kk < currentVowels.Length; ++kk)
-                                {
-                                    blendValuesSum += currentBlendValues[kk];
-                                }
-
                                 for (int kk = 0; kk < currentVowels.Length; ++kk)
                                 {
                                     currentBlendValues[kk] = Mathf.MoveTowards(currentBlendValues[kk],
