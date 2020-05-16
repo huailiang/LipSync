@@ -32,7 +32,7 @@ namespace LipSync
         protected string recognizeResult;
         protected float[] targetBlendValues = new float[MAX_BLEND_VALUE_COUNT];
         protected float[] currentBlendValues = new float[MAX_BLEND_VALUE_COUNT];
-        private AudioVisualization visualization;
+        private Visualization visualization;
         public Text recognizeText;
 
 
@@ -54,7 +54,7 @@ namespace LipSync
                 propertyIndexs[i] = targetBlendShapeObject.sharedMesh.GetBlendShapeIndex(propertyNames[i]);
             }
             runtimeRecognizer = new LipSyncRuntimeRecognizer(recognizerLanguage, windowSize, amplitudeThreshold);
-            visualization = new AudioVisualization();
+            visualization = new Visualization();
         }
 
         void OnValidate()

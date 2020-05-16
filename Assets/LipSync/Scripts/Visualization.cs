@@ -9,7 +9,7 @@
  */
 namespace LipSync
 {
-    public class AudioVisualization
+    public class Visualization
     {
         const int band_cnt = 8;
 
@@ -23,7 +23,7 @@ namespace LipSync
         Material[] mat = new Material[band_cnt];
 
 
-        public AudioVisualization()
+        public Visualization()
         {
             GameObject go = GameObject.Find("AudioVisulization");
             for (int i = 0; i < go.transform.childCount; i++)
