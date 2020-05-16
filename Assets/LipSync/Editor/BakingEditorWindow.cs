@@ -50,7 +50,8 @@ namespace LipSync
                         EditorGUILayout.BeginVertical(GUILayout.Width(100));
                         {
                             EditorGUILayout.LabelField("AudioClip List", EditorStyles.boldLabel);
-                            audioClipListScroll = EditorGUILayout.BeginScrollView(audioClipListScroll, EditorStyles.textField, GUILayout.MinHeight(100), GUILayout.MaxHeight(250));
+                            audioClipListScroll = EditorGUILayout.BeginScrollView(audioClipListScroll,
+                                EditorStyles.textField, GUILayout.MinHeight(100), GUILayout.MaxHeight(250));
                             foreach (AudioClip a in audioClipToBake)
                             {
                                 EditorGUILayout.LabelField(a.name);
@@ -82,7 +83,8 @@ namespace LipSync
                                 }
                                 for (int i = 0; i < currentVowels.Length; ++i)
                                 {
-                                    EditorGUILayout.PropertyField(propertyNames.GetArrayElementAtIndex(i), new GUIContent(currentVowels[i]));
+                                    EditorGUILayout.PropertyField(propertyNames.GetArrayElementAtIndex(i),
+                                        new GUIContent(currentVowels[i]));
                                 }
                             }
                             EditorGUILayout.EndVertical();
@@ -102,7 +104,6 @@ namespace LipSync
                         EditorGUILayout.PropertyField(serializedEditorWindow.FindProperty("amplitudeThreshold"));
                         EditorGUILayout.PropertyField(serializedEditorWindow.FindProperty("moveTowardsSpeed"));
                     }
-
                     EditorGUILayout.BeginHorizontal();
                     {
                         if (GUILayout.Button("Bake")) Bake();
@@ -117,7 +118,8 @@ namespace LipSync
 
         private void LoadAudioClips()
         {
-            string tempPath = EditorUtility.OpenFolderPanel("Select a asset folder containing AudioClips", Application.dataPath, "");
+            string tempPath = EditorUtility.OpenFolderPanel("Select a asset folder containing AudioClips",
+                Application.dataPath, "");
             if (tempPath.IndexOf(Application.dataPath, 0) == 0)
             {
                 audioClipInputPath = tempPath.Substring(Application.dataPath.Length - "Assets".Length);
@@ -126,13 +128,17 @@ namespace LipSync
                 audioClipToBake.Clear();
                 foreach (string s in audioClipAssetNames)
                 {
-                    AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(s.Substring(Application.dataPath.Length - "Assets".Length));
+                    AudioClip clip =
+                        AssetDatabase.LoadAssetAtPath<AudioClip>(
+                            s.Substring(Application.dataPath.Length - "Assets".Length));
                     if (clip != null) audioClipToBake.Add(clip);
                 }
             }
             else if (tempPath.Length != 0)
             {
-                EditorUtility.DisplayDialog("Invalid path", "This folder is not contained in the asset. Please make sure you choose a folder inside the \"Assets\" folder.", "OK");
+                EditorUtility.DisplayDialog("Invalid path",
+                    "This folder is not contained in the asset. Please make sure you choose a folder inside the \"Assets\" folder.",
+                    "OK");
             }
         }
 
@@ -140,7 +146,8 @@ namespace LipSync
         {
             if (audioClipToBake.Count == 0)
             {
-                EditorUtility.DisplayDialog("No AudioClip found", "You have not select a folder containing AudioClip. Please first specify a valid folder.", "OK");
+                EditorUtility.DisplayDialog("No AudioClip found",
+                    "You have not select a folder containing AudioClip. Please first specify a valid folder.", "OK");
             }
             else
             {
@@ -158,7 +165,9 @@ namespace LipSync
                 }
                 if (animDataCount < currentVowels.Length)
                 {
-                    EditorUtility.DisplayDialog("Incomplete animation data", "There is incomplete animation data. Please make sure you have filled all required data in the Animation Property Setting.", "OK");
+                    EditorUtility.DisplayDialog("Incomplete animation data",
+                        "There is incomplete animation data. Please make sure you have filled all required data in the Animation Property Setting.",
+                        "OK");
                 }
                 else
                 {
@@ -172,7 +181,8 @@ namespace LipSync
                             AssetDatabase.CreateFolder(path, "GeneratedClips");
                         }
 
-                        LipSyncOfflineRecognizer recognizer = new LipSyncOfflineRecognizer(recognizerLanguage, amplitudeThreshold, windowSize, shiftStepSize);
+                        LipSyncOfflineRecognizer recognizer = new LipSyncOfflineRecognizer(recognizerLanguage,
+                            amplitudeThreshold, windowSize, shiftStepSize);
 
                         Dictionary<string, int> vowelToIndexDict = new Dictionary<string, int>();
                         for (int i = 0; i < currentVowels.Length; ++i)
@@ -193,7 +203,7 @@ namespace LipSync
                             float[] targetBlendValues = new float[currentVowels.Length];
                             float[] currentBlendValues = new float[currentVowels.Length];
                             string[] recognizeResult = recognizer.RecognizeAllByAudioClip(audioClipToBake[j]);
-                            float timeUnit = 1024.0f * (1.0f / (float)audioClipToBake[j].frequency);
+                            float timeUnit = 1024.0f * (1.0f / (float) audioClipToBake[j].frequency);
 
                             float blendValuesSum = 0.0f;
                             for (int k = 0; k < recognizeResult.Length; ++k)
@@ -214,8 +224,10 @@ namespace LipSync
 
                                 for (int kk = 0; kk < currentVowels.Length; ++kk)
                                 {
-                                    currentBlendValues[kk] = Mathf.MoveTowards(currentBlendValues[kk], targetBlendValues[kk], moveTowardsSpeed * timeUnit);
-                                    Keyframe keyframe = new Keyframe(timeUnit * k, Mathf.Lerp(propertyMinValue, propertyMaxValue, currentBlendValues[kk]));
+                                    currentBlendValues[kk] = Mathf.MoveTowards(currentBlendValues[kk],
+                                        targetBlendValues[kk], moveTowardsSpeed * timeUnit);
+                                    Keyframe keyframe = new Keyframe(timeUnit * k,
+                                        Mathf.Lerp(propertyMinValue, propertyMaxValue, currentBlendValues[kk]));
                                     curveArray[kk].AddKey(keyframe);
                                 }
                             }
@@ -228,18 +240,20 @@ namespace LipSync
 
                             for (int l = 0; l < currentVowels.Length; ++l)
                             {
-                                clip.SetCurve(targetRelativePath, typeof(SkinnedMeshRenderer), "blendShape." + propertyNames[l], curveArray[l]);
+                                clip.SetCurve(targetRelativePath, typeof(SkinnedMeshRenderer),
+                                    "blendShape." + propertyNames[l], curveArray[l]);
                             }
                             tempClipList.Add(clip);
                         }
 
                         for (int m = 0; m < tempClipList.Count; ++m)
                         {
-                            AssetDatabase.CreateAsset(tempClipList[m], path + "/GeneratedClips/" + audioClipToBake[m].name + "_anim.anim");
+                            AssetDatabase.CreateAsset(tempClipList[m],
+                                path + "/GeneratedClips/" + audioClipToBake[m].name + "_anim.anim");
                         }
 
-                        EditorUtility.DisplayDialog("Complete Baking", "LipSync baking is completed. Please check the specified folder for result.", "OK");
-
+                        EditorUtility.DisplayDialog("Complete Baking",
+                            "LipSync baking is completed. Please check the specified folder for result.", "OK");
                     }
                 }
             }
