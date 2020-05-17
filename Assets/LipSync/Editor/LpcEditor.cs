@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace LipSync
         private AudioClip audioClip;
         private float[] audioBuffer;
         private int window, step, fs;
+        private string info;
 
         private void OnGUI()
         {
@@ -30,6 +32,11 @@ namespace LipSync
                 Normalize();
                 var split = MakeFrame();
                 Formant(split);
+            }
+            GUILayout.Space(10);
+            if (!string.IsNullOrEmpty(info))
+            {
+                GUILayout.TextArea(info);
             }
             GUILayout.EndVertical();
         }
@@ -76,7 +83,7 @@ namespace LipSync
         private float[] PreEmphasis(float[] x, float a)
         {
             var temp = new float[window];
-            int i = 0;
+            int i = 1;
             while (i <= window - 2)
             {
                 temp[i - 1] = x[i] - a * x[i - 1];
@@ -90,6 +97,7 @@ namespace LipSync
             int i = 0;
             float a = 0.67f;
             var lpc = new LpcModel();
+            info = String.Empty;
             while (i < splitting.Count())
             {
                 var FL = PreEmphasis(splitting[i], a);
@@ -98,8 +106,20 @@ namespace LipSync
                 {
                     FL[i] = FL[i] * w[i];
                 }
-                FL = lpc.EstimateLpcCoefficients(FL, fs, 2 + fs / 1000);
+                var coefficients = lpc.EstimateLpcCoefficients(FL, 2 + fs / 1000);
+                var formants = lpc.FindFormants(coefficients, fs);
+                AppendInfo(i, formants);
                 i++;
+            }
+        }
+
+
+        private void AppendInfo(int idx, double[] formants)
+        {
+            info += idx.ToString("N2");
+            for (int i = 0; i < formants.Length; i++)
+            {
+                info += formants[i].ToString("f3") + " ";
             }
         }
     }

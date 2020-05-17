@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LpcModel
 {
     /// Estimate LPC polynomial coefficients from the signal
     /// Uses the Levinson-Durbin recursion algorithm
-    /// - Returns: `modelLength` + 1 autocorrelation coefficients for an all-pole model
+    /// - Returns: `len` + 1 autocorrelation coefficients for an all-pole model
     /// the first coefficient is 1.0 for perfect autocorrelation with zero offset
-    public float[] EstimateLpcCoefficients(float[] samples, int sampleRate, int modelLength)
+    public float[] EstimateLpcCoefficients(float[] samples, int len)
     {
-        int len = modelLength;
         float[] correlations = new float[len + 1];
         float[] coefficients = new float[len + 1];
         if (samples.Length <= len)
@@ -22,7 +22,6 @@ public class LpcModel
             }
             return ret;
         }
-
         for (int delay = 0; delay <= len; delay++)
         {
             float correlationSum = 0.0f;
@@ -32,18 +31,15 @@ public class LpcModel
             }
             correlations[delay] = correlationSum;
         }
-
         var modelError = correlations[0];
         coefficients[0] = 1.0f;
-
-        for (int delay = 1; delay <= modelLength; delay++)
+        for (int delay = 1; delay <= len; delay++)
         {
             var rcNum = 0.0f;
             for (int i = 1; i <= delay; i++)
             {
                 rcNum -= coefficients[delay - i] * correlations[i];
             }
-
             coefficients[delay] = rcNum / modelError;
 
             for (int i = 1; i < delay / 2; i++)
@@ -157,8 +153,13 @@ public class LpcModel
         return new Complex();
     }
 
-    /// Use Laguerre's method to find roots.
-    ///
+    public double[] FindFormants(float[] coefficients, int rate)
+    {
+        var complexPolynomial = coefficients.Select(x => new Complex(x, 0));
+        return FindFormants(complexPolynomial.ToArray(), rate);
+    }
+
+    // Use Laguerre's method to find roots.
     /// - Parameter polynomial: coefficients of the input polynomial
     /// - Note: Does not implement root polishing, so accuracy may be impacted
     /// - Note: May include duplicated roots/formants
@@ -171,13 +172,11 @@ public class LpcModel
         for (int j = modelOrder; j >= 1; j--)
         {
             var root = LaguerreRoot(deflatedPolynomial, Complex.zero);
-
             // If imaginary part is very small, ignore it
             if (Math.Abs(root.imag) < 2.0 * EPS * Math.Abs(root.real))
             {
                 root.imag = 0.0;
             }
-
             roots.Add(root);
 
             // Perform forward deflation. Divide by the factor of the root found above
