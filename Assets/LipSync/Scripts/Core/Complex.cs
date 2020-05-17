@@ -84,6 +84,23 @@ public struct Complex
         }
     }
 
+    public Complex sqrt
+    {
+        get
+        {
+            var d = Math.Sqrt(real * real + imag * imag);
+            var r = Math.Sqrt((real + d) / 2.0);
+            if (imag < 0.0)
+            {
+                return new Complex(r, -Math.Sqrt((-real + d) / 2.0));
+            }
+            else
+            {
+                return new Complex(real, Math.Sqrt((-real + d) / 2.0));
+            }
+        }
+    }
+
     public static Complex operator +(double l, Complex r)
     {
         return new Complex(l + r.real, l + r.imag);

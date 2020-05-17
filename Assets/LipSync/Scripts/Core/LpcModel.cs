@@ -85,23 +85,21 @@ public class LpcModel
     /// Algorithm from Numerical Recipes in C by Press/Teutkolsky/Vetterling/Flannery
     private Complex LaguerreRoot(Complex[] polynomial, Complex guess)
     {
-        var m = polynomial.Length - 1;
-        var MR = 8;
-        var MT = 10;
-        var maximumIterations = MR * MT;
-        var EPSS = 1.0e-7;
+        int m = polynomial.Length - 1;
+        const int MR = 8;
+        const int MT = 10;
+        int maximumIterations = MR * MT;
+        const double EPSS = 1.0e-7;
         double abx, abp, abm, err;
-        Complex dx, x1, b, d, f, g, h, sq, gp, gm, g2;
         var frac = new Double[] {0.0, 0.5, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875, 1.0};
         var x = guess;
-        for (int iteration = 1; iteration < maximumIterations; iteration++)
+        for (int iteration = 1; iteration <= maximumIterations; iteration++)
         {
-            b = polynomial[m];
+            Complex b = polynomial[m];
             err = b.abs;
-            d = new Complex(0.0, 0.0);
-            f = new Complex(0.0, 0.0);
+            Complex d = Complex.zero;
+            Complex f = Complex.zero;
             abx = x.abs;
-
             for (int j = m - 1; j >= 0; j--)
             {
                 f = x * f + d;
@@ -109,30 +107,22 @@ public class LpcModel
                 b = x * b + polynomial[j];
                 err = b.abs + abx * err;
             }
-
             err *= EPSS; // estimate of round-off error in evaluating polynomial
-            if (b.abs < err)
-            {
-                return x;
-            }
+            if (b.abs < err) return x;
 
-            g = d / b;
-            g2 = g * g;
-            h = g2 - 2.0 * f / b;
-            sq = Math.Sqrt(m - 1) * (m * h - g2);
-            gp = g + sq;
-            gm = g - sq;
+            Complex g = d / b;
+            Complex g2 = g * g;
+            Complex h = g2 - 2.0 * f / b;
+            Complex sq = ((m - 1) * (m * h - g2)).sqrt;
+            Complex gp = g + sq;
+            Complex gm = g - sq;
             abp = gp.abs;
             abm = gm.abs;
-            if (abp < abm)
-            {
-                gp = gm;
-            }
+            if (abp < abm) gp = gm;
 
-            dx = Math.Max(abp, abm) > 0.0
-                ? m / gp
+            var dx = Math.Max(abp, abm) > 0.0 ? m / gp
                 : (1 + abx) * new Complex(Mathf.Cos(iteration), Mathf.Sin(iteration));
-            x1 = x - dx;
+            Complex x1 = x - dx;
             if (x == x1)
             {
                 return x; // converged
@@ -148,9 +138,8 @@ public class LpcModel
                 x = x - frac[iteration / MT] * dx;
             }
         }
-
-        Debug.Log("Too many iterations in Laguerre, giving up");
-        return new Complex();
+        Debug.LogError("Too many iterations in Laguerre, giving up");
+        return Complex.zero;
     }
 
     public double[] FindFormants(float[] coefficients, int rate)
@@ -202,7 +191,6 @@ public class LpcModel
             var t = polishedRoots[i].arg * rate / Math.PI / 2;
             formantFrequencies.Add(t);
         }
-
         formantFrequencies.Sort();
         return formantFrequencies.ToArray();
     }
