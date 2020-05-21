@@ -4,7 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace LipSync
+namespace LipSync.Editor
 {
     public class BakingEditorWindow : EditorWindow
     {

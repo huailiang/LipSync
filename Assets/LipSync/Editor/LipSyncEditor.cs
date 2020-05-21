@@ -1,9 +1,9 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace LipSync
+namespace LipSync.Editor
 {
-    public class LipSyncEditor : Editor
+    public class LipSyncEditor : UnityEditor.Editor
     {
 
         protected bool isAdvancedOptionsFoldOut;

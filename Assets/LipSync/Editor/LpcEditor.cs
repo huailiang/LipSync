@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace LipSync
+namespace LipSync.Editor
 {
     public class LpcEditor : EditorWindow
     {
@@ -16,9 +16,18 @@ namespace LipSync
         }
 
         private AudioClip audioClip;
+        private LpcModel model;
         private float[] audioBuffer;
         private int window, step, fs;
         private string info;
+
+        private void OnEnable()
+        {
+            if(model==null)
+            {
+                model = new LpcModel();
+            }
+        }
 
         private void OnGUI()
         {
@@ -40,23 +49,29 @@ namespace LipSync
                     Complex.zero,
                     new Complex(1,0)
                 };
-                var ret = LpcModel.FindRoots(poly);
-                foreach(var it in ret)
+                var ret = model.FindRoots(poly);
+                foreach (var it in ret)
                 {
                     Debug.Log(it);
                 }
             }
             if (GUILayout.Button("correlate"))
             {
-                double[] a = new double[] { 3, 1, 2, 4, 3, 5, 6 };
-                double[] v = new double[] { 3, 1, 4, 2 };
-                var t = LpcModel.correlate(a, v);
+                var a = new float[] { 3, 1, 2, 4, 3, 5, 6 };
+                var v = new float[] { 3, 1, 4, 2 };
+                var t = model.Correlate(a, v);
                 string str = "";
                 for (int i = 0; i < t.Length; i++)
                 {
                     str += t[i] + " ";
                 }
                 Debug.Log(str);
+            }
+            if (GUILayout.Button("toeplitz"))
+            {
+                float[] c = new float[] { 3, 1, 4, 2 };
+                var t = model.Toeplitz(c);
+                Debug.Log(t);
             }
             GUILayout.Space(10);
             if (!string.IsNullOrEmpty(info))
@@ -121,18 +136,17 @@ namespace LipSync
         {
             int i = 0;
             float a = 0.67f;
-            var lpc = new LpcModel();
             info = String.Empty;
             while (i < splitting.Count())
             {
-                var FL = PreEmphasis(splitting[i], a);
-                var w = MathToolBox.GenerateWindow(window, MathToolBox.EWindowType.Hamming);
+                float[] FL = PreEmphasis(splitting[i], a);
+                float[] w = MathToolBox.GenerateWindow(window, MathToolBox.EWindowType.Hamming);
                 for (int j = 0; j < window; j++)
                 {
                     FL[i] = FL[i] * w[i];
                 }
-                var coefficients = lpc.EstimateLpcCoefficients(FL, 2 + fs / 1000);
-                var formants = lpc.FindFormants(coefficients, fs);
+                var coefficients = model.EstimateLpcCoefficients(FL, 2 + fs / 1000);
+                var formants = model.FindFormants(coefficients, fs);
                 AppendInfo(i, formants);
                 i++;
             }

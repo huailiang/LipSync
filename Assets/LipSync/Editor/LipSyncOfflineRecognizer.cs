@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
-namespace LipSync
+namespace LipSync.Editor
 {
-
     public class LipSyncOfflineRecognizer : LipSyncRecognizer
     {
         private int shiftStepSize;

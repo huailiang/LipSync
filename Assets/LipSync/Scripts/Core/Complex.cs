@@ -1,6 +1,6 @@
 ﻿using System;
 
-public struct Complex
+public struct Complex : IEquatable<Complex>
 {
     public bool Equals(Complex other)
     {

@@ -4,7 +4,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace XEditor
+namespace LipSync.Editor
 {
     public class GenerateLipAnimWindow : EditorWindow
     {
@@ -55,8 +55,8 @@ namespace XEditor
 
             EditorGUILayout.LabelField("duration:" + duration);
 
-            EditorGUILayout.LabelField(LipSync.LipSync.recdPat);
-            if (!File.Exists(LipSync.LipSync.recdPat))
+            EditorGUILayout.LabelField(LipSync.recdPat);
+            if (!File.Exists(LipSync.recdPat))
             {
                 EditorGUILayout.HelpBox("record file not found, generate at first", MessageType.Error);
             }
@@ -78,7 +78,7 @@ namespace XEditor
 
         private void Generate()
         {
-            string tempPath = LipSync.LipSync.recdPat;
+            string tempPath = LipSync.recdPat;
             if (File.Exists(tempPath))
             {
                 var list = Read(tempPath);
@@ -90,7 +90,7 @@ namespace XEditor
             }
             else
             {
-                EditorUtility.DisplayDialog("tip", "not found " + LipSync.LipSync.recdPat, "ok");
+                EditorUtility.DisplayDialog("tip", "not found " + LipSync.recdPat, "ok");
             }
         }
 
