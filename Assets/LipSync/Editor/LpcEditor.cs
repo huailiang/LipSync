@@ -25,7 +25,7 @@ namespace LipSync
             GUILayout.BeginVertical();
 
             GUILayout.Space(10);
-            audioClip = (AudioClip) EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
+            audioClip = (AudioClip)EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
 
             if (GUILayout.Button("Analy"))
             {
@@ -40,14 +40,23 @@ namespace LipSync
                     Complex.zero,
                     new Complex(1,0)
                 };
-                int n = 2;
-                for (int i = 0; i < 2; i++)
+                var ret = LpcModel.FindRoots(poly);
+                foreach(var it in ret)
                 {
-                    var root = LpcModel.Laguerre(poly, n, 1e-13);
-                    Debug.Log("ret: " + root);
-                    poly = LpcModel.Deflate(root, poly, n);
-                    n--;
+                    Debug.Log(it);
                 }
+            }
+            if (GUILayout.Button("correlate"))
+            {
+                double[] a = new double[] { 0, 1, 2, 3, 4, 5 };
+                double[] v = new double[] { 0, 1, 2 };
+                var t = LpcModel.correlate(a, v);
+                string str = "";
+                for (int i = 0; i < t.Length; i++)
+                {
+                    str += t[i] + " ";
+                }
+                Debug.Log(str);
             }
             GUILayout.Space(10);
             if (!string.IsNullOrEmpty(info))

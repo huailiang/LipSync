@@ -196,7 +196,7 @@ public class LpcModel
     }
 
 
-    static Complex RandomFloat(Complex low, Complex high)
+    private static Complex RandomFloat(Complex low, Complex high)
     {
         float rand = 0.5f;// UnityEngine.Random.Range(0.0f, 1.0f);
         Complex d = new Complex(rand);
@@ -204,7 +204,7 @@ public class LpcModel
         return low + k;
     }
 
-    static Complex Evalpoly(Complex x, Complex[] a, int n)
+    private static Complex Evalpoly(Complex x, Complex[] a, int n)
     {
         if (n < 0) n = 0;
         Complex p = a[n];
@@ -215,7 +215,7 @@ public class LpcModel
         return p;
     }
 
-    static Complex[] PolyDerivative(Complex[] a, int n)
+    private static Complex[] PolyDerivative(Complex[] a, int n)
     {
         if (n == 0)
         {
@@ -230,7 +230,7 @@ public class LpcModel
         return b;
     }
 
-    public static Complex Laguerre(Complex[] a, int n, double tol)
+    private static Complex Laguerre(Complex[] a, int n, double tol)
     {
         const int IMAX = 10000;
         Complex x = RandomFloat(Complex.zero, new Complex(100));
@@ -265,7 +265,7 @@ public class LpcModel
         return Complex.zero;
     }
 
-    public static Complex[] Deflate(Complex root, Complex[] a, int n)
+    private static Complex[] Deflate(Complex root, Complex[] a, int n)
     {
         Complex[] b = new Complex[n];
         b[n - 1] = a[n];
@@ -274,6 +274,71 @@ public class LpcModel
             b[i] = a[i + 1] + root * b[i + 1];
         }
         return b;
+    }
+
+
+    public static Complex[] FindRoots(Complex[] poly)
+    {
+        int n = poly.Length - 1;
+        int N = n;
+        Complex[] ret = new Complex[N];
+        for (int i = 0; i < N; i++)
+        {
+            ret[i] = Laguerre(poly, n, 1e-13);
+            poly = Deflate(ret[i], poly, n--);
+        }
+        return ret;
+    }
+
+
+    /// <summary>
+    /// 线性相关Linear Cross-Correlation
+    /// 实现类似于numpy.correlate
+    /// mode = "full"
+    /// 参考：https://fanyublog.com/2015/11/16/corr_python
+    /// </summary>
+    /// <param name="a">Input sequences.</param>
+    /// <param name="v">Input sequences.</param>
+    /// <returns>iscrete cross-correlation of `a` and `v`</returns>
+    public static double[] correlate(double[] a, double[] v)
+    {
+        if (a.Length < v.Length)
+        {
+            throw new Exception("correlate error, a is larger than v");
+        }
+
+        int n = a.Length + v.Length - 1;
+        double[] ret = new double[n];
+
+        double[] a2 = new double[a.Length];
+        for (int i = 0; i < n; i++)
+        {
+            int d = v.Length - 1 - i;
+            if (d >= 0)
+            {
+                int j = 0;
+                while (d + j < v.Length)
+                {
+                    a2[j] = v[d + j];
+                    j++;
+                }
+            }
+            else
+            {
+                int j = -d;
+                int t = 0;
+                while (t < v.Length && j < a.Length)
+                {
+                    a2[j++] = v[t++];
+                }
+            }
+            ret[i] = 0;
+            for (int j = 0; j < a.Length; j++)
+            {
+                ret[i] += a[j] * a2[j];
+            }
+        }
+        return ret;
     }
 
 }

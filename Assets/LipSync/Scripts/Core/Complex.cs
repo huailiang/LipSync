@@ -23,7 +23,7 @@ public struct Complex
     public double real, imag;
 
     private static readonly Complex in_zero = new Complex(0.0);
-    private static readonly Complex in_one = new Complex(1.0);
+    private static readonly Complex in__one = new Complex(1.0);
 
     public Complex(double real)
     {
@@ -44,7 +44,7 @@ public struct Complex
 
     public static Complex one
     {
-        get { return Complex.in_one; }
+        get { return Complex.in__one; }
     }
 
     public double abs
@@ -138,10 +138,7 @@ public struct Complex
 
     public Complex tan
     {
-        get
-        {
-            return sin / cos;
-        }
+        get { return sin / cos; }
     }
 
     public static Complex operator +(double l, Complex r)
