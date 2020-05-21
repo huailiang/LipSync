@@ -33,6 +33,22 @@ namespace LipSync
                 var split = MakeFrame();
                 Formant(split);
             }
+            if (GUILayout.Button("root"))
+            {
+                Complex[] poly = new Complex[] {
+                    new Complex(-2,0),
+                    Complex.zero,
+                    new Complex(1,0)
+                };
+                int n = 2;
+                for (int i = 0; i < 2; i++)
+                {
+                    var root = LpcModel.Laguerre(poly, n, 1e-13);
+                    Debug.Log("ret: " + root);
+                    poly = LpcModel.Deflate(root, poly, n);
+                    n--;
+                }
+            }
             GUILayout.Space(10);
             if (!string.IsNullOrEmpty(info))
             {

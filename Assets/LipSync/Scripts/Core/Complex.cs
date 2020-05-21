@@ -22,7 +22,14 @@ public struct Complex
 
     public double real, imag;
 
-    private static readonly Complex zeroVector = new Complex(0.0f, 0.0f);
+    private static readonly Complex in_zero = new Complex(0.0);
+    private static readonly Complex in_one = new Complex(1.0);
+
+    public Complex(double real)
+    {
+        this.real = real;
+        this.imag = 0;
+    }
 
     public Complex(double real, double imag)
     {
@@ -32,10 +39,12 @@ public struct Complex
 
     public static Complex zero
     {
-        get
-        {
-            return Complex.zeroVector;
-        }
+        get { return Complex.in_zero; }
+    }
+
+    public static Complex one
+    {
+        get { return Complex.in_one; }
     }
 
     public double abs
@@ -76,6 +85,9 @@ public struct Complex
         }
     }
 
+    /// <summary>
+    /// 共轭复数
+    /// </summary>
     public Complex conj
     {
         get
@@ -84,11 +96,14 @@ public struct Complex
         }
     }
 
+    /// <summary>
+    /// 参考： https://wenku.baidu.com/view/5bd7d21ee518964bcf847c8d.html
+    /// </summary>
     public Complex sqrt
     {
         get
         {
-            var d = Math.Sqrt(real * real + imag * imag);
+            var d = Math.Sqrt(norm);
             var r = Math.Sqrt((real + d) / 2.0);
             if (imag < 0.0)
             {
@@ -96,8 +111,36 @@ public struct Complex
             }
             else
             {
-                return new Complex(real, Math.Sqrt((-real + d) / 2.0));
+                return new Complex(r, Math.Sqrt((-real + d) / 2.0));
             }
+        }
+    }
+
+    public Complex cos
+    {
+        get
+        {
+            double r = Math.Cos(real) * Math.Cosh(imag);
+            double i = -Math.Sin(real) * Math.Sinh(imag);
+            return new Complex(r, i);
+        }
+    }
+
+    public Complex sin
+    {
+        get
+        {
+            double r = Math.Sin(real) * Math.Cosh(imag);
+            double i = Math.Cos(real) * Math.Sinh(imag);
+            return new Complex(r, i);
+        }
+    }
+
+    public Complex tan
+    {
+        get
+        {
+            return sin / cos;
         }
     }
 
@@ -171,6 +214,6 @@ public struct Complex
 
     public override string ToString()
     {
-        return $"{real} {imag}i";
+        return $"{real:f3} {imag:f3}i";
     }
 }

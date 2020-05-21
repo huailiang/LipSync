@@ -67,14 +67,14 @@ public class LpcModel
         int index = 0;
         foreach (var frequency in frequencies)
         {
-            var radians = frequency / (double) samplingRate * Mathf.PI * 2;
+            var radians = frequency / (double)samplingRate * Mathf.PI * 2;
             Complex response = new Complex(0.0, 0.0);
             for (int i = 0; i < coefficients.Length; i++)
             {
                 var c = coefficients[i];
                 response += new Complex(c < 0 ? -c : c, i * radians);
             }
-            float v = 20 * Mathf.Log10((float) (1.0 / response.abs));
+            float v = 20 * Mathf.Log10((float)(1.0 / response.abs));
             retval[index++] = v;
         }
         return retval;
@@ -83,7 +83,7 @@ public class LpcModel
     /// Laguerre's method to find one root of the given complex polynomial
     /// Call this method repeatedly to find all the complex roots one by one
     /// Algorithm from Numerical Recipes in C by Press/Teutkolsky/Vetterling/Flannery
-    private Complex LaguerreRoot(Complex[] polynomial, Complex guess)
+    public static Complex LaguerreRoot(Complex[] polynomial, Complex guess)
     {
         int m = polynomial.Length - 1;
         const int MR = 8;
@@ -91,8 +91,8 @@ public class LpcModel
         int maximumIterations = MR * MT;
         const double EPSS = 1.0e-7;
         double abx, abp, abm, err;
-        var frac = new Double[] {0.0, 0.5, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875, 1.0};
-        var x = guess;
+        var frac = new Double[] { 0.0, 0.5, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875, 1.0 };
+        Complex x = guess;
         for (int iteration = 1; iteration <= maximumIterations; iteration++)
         {
             Complex b = polynomial[m];
@@ -194,4 +194,86 @@ public class LpcModel
         formantFrequencies.Sort();
         return formantFrequencies.ToArray();
     }
+
+
+    static Complex RandomFloat(Complex low, Complex high)
+    {
+        float rand = 0.5f;// UnityEngine.Random.Range(0.0f, 1.0f);
+        Complex d = new Complex(rand);
+        Complex k = d * (high - low + 1);
+        return low + k;
+    }
+
+    static Complex Evalpoly(Complex x, Complex[] a, int n)
+    {
+        if (n < 0) n = 0;
+        Complex p = a[n];
+        for (int i = 1; i <= n; i++)
+        {
+            p = a[n - i] + p * x;
+        }
+        return p;
+    }
+
+    static Complex[] PolyDerivative(Complex[] a, int n)
+    {
+        if (n == 0)
+        {
+            return new Complex[] { Complex.zero };
+        }
+        Complex[] b = new Complex[n];
+        b[0] = a[1];
+        for (int i = 1; i < n; i++)
+        {
+            b[i] = a[i + 1] * (i + 1);
+        }
+        return b;
+    }
+
+    public static Complex Laguerre(Complex[] a, int n, double tol)
+    {
+        const int IMAX = 10000;
+        Complex x = RandomFloat(Complex.zero, new Complex(100));
+        for (int i = 0; i < IMAX; i++)
+        {
+            Complex poly = Evalpoly(x, a, n);
+            Complex[] fderivativetemp = PolyDerivative(a, n);
+            Complex fderivative = Evalpoly(x, fderivativetemp, n - 1);
+            Complex sderivative = Evalpoly(x, PolyDerivative(fderivativetemp, n - 1), n - 2);
+            if (poly.abs < tol)
+            {
+                return x;
+            }
+
+            Complex g = fderivative / poly;
+            Complex h = g * g - sderivative / poly;
+            Complex f = ((n - 1) * (n * h - g * g)).sqrt;
+            Complex dx = Complex.zero;
+            if ((g + f).abs > (g - f).abs)
+            {
+                dx = n / (g + f);
+            }
+            else
+            {
+                dx = n / (g - f);
+            }
+            x = x - dx;
+            if (dx.abs < tol)
+                return x;
+        }
+        Debug.LogError("ERROR: Too many iterations!");
+        return Complex.zero;
+    }
+
+    public static Complex[] Deflate(Complex root, Complex[] a, int n)
+    {
+        Complex[] b = new Complex[n];
+        b[n - 1] = a[n];
+        for (int i = n - 2; i >= 0; i--)
+        {
+            b[i] = a[i + 1] + root * b[i + 1];
+        }
+        return b;
+    }
+
 }
