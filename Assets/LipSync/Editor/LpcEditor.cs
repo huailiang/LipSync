@@ -48,8 +48,8 @@ namespace LipSync
             }
             if (GUILayout.Button("correlate"))
             {
-                double[] a = new double[] { 0, 1, 2, 3, 4, 5 };
-                double[] v = new double[] { 0, 1, 2 };
+                double[] a = new double[] { 3, 1, 2, 4, 3, 5, 6 };
+                double[] v = new double[] { 3, 1, 4, 2 };
                 var t = LpcModel.correlate(a, v);
                 string str = "";
                 for (int i = 0; i < t.Length; i++)

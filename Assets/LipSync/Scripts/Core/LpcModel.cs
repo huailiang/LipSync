@@ -309,17 +309,16 @@ public class LpcModel
 
         int n = a.Length + v.Length - 1;
         double[] ret = new double[n];
-
-        double[] a2 = new double[a.Length];
         for (int i = 0; i < n; i++)
         {
+            ret[i] = 0;
             int d = v.Length - 1 - i;
             if (d >= 0)
             {
                 int j = 0;
                 while (d + j < v.Length)
                 {
-                    a2[j] = v[d + j];
+                    ret[i] += a[j] * v[d + j];
                     j++;
                 }
             }
@@ -329,13 +328,9 @@ public class LpcModel
                 int t = 0;
                 while (t < v.Length && j < a.Length)
                 {
-                    a2[j++] = v[t++];
+                    ret[i] += v[t++] * a[j];
+                    j++;
                 }
-            }
-            ret[i] = 0;
-            for (int j = 0; j < a.Length; j++)
-            {
-                ret[i] += a[j] * a2[j];
             }
         }
         return ret;
