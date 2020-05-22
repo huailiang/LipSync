@@ -304,6 +304,13 @@ namespace LipSync
             return b;
         }
 
+        public Complex[] FindRoots(float[] poly)
+        {
+            Complex[] cs = new Complex[poly.Length];
+            for (int i = 0; i < cs.Length; i++)
+                cs[i] = new Complex(poly[i]);
+            return FindRoots(cs);
+        }
 
         public Complex[] FindRoots(Complex[] poly)
         {

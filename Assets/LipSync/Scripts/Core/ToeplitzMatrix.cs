@@ -53,7 +53,7 @@
             float dMatrixValue = MatrixValue(data, size);
             if (dMatrixValue == 0) return null;
             float[,] dReverseMatrix = new float[size, 2 * size];
-            float x, c;  
+            float x, c;
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < 2 * size; j++)
@@ -71,12 +71,12 @@
                     int m = i; for (; data[m, j] == 0; m++) ;
                     if (m == size) return null;
                     else
-                    {                
+                    {
                         // Add i-row with m-row         
                         for (int n = j; n < 2 * size; n++)
                             dReverseMatrix[i, n] += dReverseMatrix[m, n];
                     }
-                }         
+                }
                 // Format the i-row with "1" start   
                 x = dReverseMatrix[i, j]; if (x != 1)
                 {
@@ -157,6 +157,27 @@
             return k * sn;
         }
 
+        private float[] Dot(float[] v)
+        {
+            if (data == null)
+            {
+                throw new System.Exception("matrix is nil");
+            }
+            if (size != v.Length)
+            {
+                throw new System.Exception("length is not equal matrix size");
+            }
+            float[] ret = new float[size];
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    ret[i] += this[i, j] * v[j];
+                }
+            }
+            return ret;
+        }
 
     }
 

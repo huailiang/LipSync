@@ -211,6 +211,6 @@ public struct Complex : IEquatable<Complex>
 
     public override string ToString()
     {
-        return $"{real:f3} {imag:f3}i";
+        return $"{real:f3}, {imag:f3}i";
     }
 }

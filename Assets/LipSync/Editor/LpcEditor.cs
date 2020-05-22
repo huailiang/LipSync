@@ -44,11 +44,7 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("root"))
             {
-                Complex[] poly = new Complex[] {
-                    new Complex(-2,0),
-                    Complex.zero,
-                    new Complex(1,0)
-                };
+                float[] poly = new float[] { -8, 12, -6, 1};
                 var ret = model.FindRoots(poly);
                 foreach (var it in ret)
                 {
@@ -57,7 +53,7 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("correlate"))
             {
-                var a = new float[] { 3, 1, 2, 4, 3, 5, 6 };
+                var a = new float[] { 3, 1, 2, 4, 3, 5, 6, 5, 6, 2 };
                 var v = new float[] { 3, 1, 4, 2 };
                 var t = model.Correlate(a, v);
                 string str = "";
@@ -69,7 +65,7 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("toeplitz"))
             {
-                float[] c = new float[] { 3, 1, 4, 2 };
+                float[] c = new float[] { 3, 4, 2, -6, 7, 3, 1, -3 };
                 ToeplitzMtrix toeplitzMtrix;
                 toeplitzMtrix = new ToeplitzMtrix(c);
                 Debug.Log(toeplitzMtrix);
