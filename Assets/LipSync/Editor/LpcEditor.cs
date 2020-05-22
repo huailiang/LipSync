@@ -70,8 +70,19 @@ namespace LipSync.Editor
             if (GUILayout.Button("toeplitz"))
             {
                 float[] c = new float[] { 3, 1, 4, 2 };
-                var t = model.Toeplitz(c);
-                Debug.Log(t);
+                ToeplitzMtrix toeplitzMtrix;
+                toeplitzMtrix = new ToeplitzMtrix(c);
+                Debug.Log(toeplitzMtrix);
+                var t = toeplitzMtrix.Inverse();
+                int n = (int)Math.Sqrt((double)t.Length);
+                string msg = "size: " + n;
+                for (int i = 0; i < n; i++)
+                {
+                    msg += "\n";
+                    for (int j = 0; j < n; j++)
+                        msg += t[i, j].ToString("f3") + "\t";
+                }
+                Debug.Log(msg);
             }
             GUILayout.Space(10);
             if (!string.IsNullOrEmpty(info))

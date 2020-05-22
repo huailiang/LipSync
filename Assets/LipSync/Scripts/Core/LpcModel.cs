@@ -215,7 +215,6 @@ namespace LipSync
                 {
                     r[i] = x[signal.Length - 1 + i];
                 }
-
             }
             else
             {
@@ -364,29 +363,6 @@ namespace LipSync
             }
             return ret;
         }
-
-        /// <summary>
-        /// 生成Toeplitz矩阵
-        /// </summary>
-        public float[,] Toeplitz(float[] c)
-        {
-            int n = c.Length;
-            float[,] ret = new float[n, n];
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
-                {
-                    if (i <= j)
-                        ret[i, j] = c[j - i];
-                    else
-                        ret[i, j] = c[i - j];
-                }
-            return ret;
-        }
-
-
-        public float[,] InvToeplitz(float[,] matrix)
-        {
-            return matrix;
-        }
+        
     }
 }

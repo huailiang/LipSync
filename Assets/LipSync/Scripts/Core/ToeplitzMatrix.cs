@@ -1,176 +1,160 @@
-﻿using System;
-
-
-namespace LipSync
+﻿namespace LipSync
 {
-    public class ToeplitzMatrix 
+    public class ToeplitzMtrix
     {
-        private long[] coefficients;
 
-        public int Size { get; private set; }
+        private float[,] data;
 
-        public ToeplitzMatrix(long[] coefficients)
+        private int size;
+
+        public int Size
         {
-            Size = (coefficients.Length + 1) / 2;
-            this.coefficients = coefficients;
+            get { return size; }
         }
 
-        public long this[int index1, int index2]
+        public float this[int x, int y]
         {
             get
             {
-                return coefficients[(Size - 1 - index2) + index1];
+                return data != null ? data[x, y] : 0;
             }
+        }
+
+        public ToeplitzMtrix(float[] c)
+        {
+            size = c.Length;
+            int n = size;
+            data = new float[n, n];
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                {
+                    if (i <= j)
+                        data[i, j] = c[j - i];
+                    else
+                        data[i, j] = c[i - j];
+                }
         }
 
         public override string ToString()
         {
-            string s = "";
-            for (int i = 0; i < Size; i++)
+            var rt = "size: " + size;
+            for (int i = 0; i < size; i++)
             {
-                for (int j = 0; j < Size; j++)
+                rt += "\n";
+                for (int j = 0; j < size; j++)
+                    rt += this[i, j].ToString("f2") + "\t";
+            }
+            return rt;
+        }
+
+        // 求逆
+        public float[,] Inverse()
+        {
+            float dMatrixValue = MatrixValue(data, size);
+            if (dMatrixValue == 0) return null;
+            float[,] dReverseMatrix = new float[size, 2 * size];
+            float x, c;  
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < 2 * size; j++)
                 {
-                    s += this[i, j] + " ";
+                    if (j < size)
+                        dReverseMatrix[i, j] = data[i, j];
+                    else dReverseMatrix[i, j] = 0;
                 }
-                if (i != Size - 1)
-                    s += "\n";
+                dReverseMatrix[i, size + i] = 1;
             }
-            return s;
-        }
-
-        public long[] ClassicMultiply(long[] v)
-        {
-            long[] w = new long[Size];
-            long sum;
-            for (int i = 0; i < Size; i++) // obliczamy i-ty element wektora, i-ty wiersz macierzy
+            for (int i = 0, j = 0; i < size && j < size; i++, j++)
             {
-                sum = 0;
-                for (int j = 0; j < Size; j++)
+                if (dReverseMatrix[i, j] == 0)
                 {
-                    sum += this[i, j] * v[j];
+                    int m = i; for (; data[m, j] == 0; m++) ;
+                    if (m == size) return null;
+                    else
+                    {                
+                        // Add i-row with m-row         
+                        for (int n = j; n < 2 * size; n++)
+                            dReverseMatrix[i, n] += dReverseMatrix[m, n];
+                    }
+                }         
+                // Format the i-row with "1" start   
+                x = dReverseMatrix[i, j]; if (x != 1)
+                {
+                    for (int n = j; n < 2 * size; n++)
+                        if (dReverseMatrix[i, n] != 0)
+                            dReverseMatrix[i, n] /= x;
                 }
-                w[i] = sum;
+                // Set 0 to the current column in the rows after current row  
+                for (int s = size - 1; s > i; s--)
+                {
+                    x = dReverseMatrix[s, j];
+                    for (int t = j; t < 2 * size; t++)
+                        dReverseMatrix[s, t] -= (dReverseMatrix[i, t] * x);
+                }
             }
-            return w;
-        }
-
-        public long[] FastMultiply(long[] v)
-        {
-            //resize to power of 2 & double
-            coefficients = ResizeToDoublePowerOf2(coefficients);
-            int n = coefficients.Length;
-
-            // make v the same length
-            v = ResizeToN(v, n);
-
-            Complex[] y_a = FFT(coefficients);
-            Complex[] y_v = FFT(v);
-            Complex[] y_w = PointwiseMultiply(y_a, y_v);
-
-            Complex[] w = InverseFFT(y_w);
-
-            long[] result = new long[Size];
-            for (long i = 0; i < result.Length; i++)
-                result[i] = (long)Math.Round(w[i + Size - 1].real) / n;
-
-            return result;
-        }
-
-        private long[] ResizeToDoublePowerOf2(long[] origin)
-        {
-            int power = 1;
-            while (power < origin.Length)
-                power *= 2;
-            power *= 2;
-
-            long[] resized = new long[power];
-            for (long i = 0; i < origin.Length; i++)
-                resized[i] = origin[i];
-            return resized;
-        }
-        private long[] ResizeToN(long[] origin, int n)
-        {
-            long[] resized = new long[n];
-            for (long i = 0; i < origin.Length; i++)
-                resized[i] = origin[i];
-            return resized;
-        }
-
-        private Complex[] FFT(long[] a)
-        {
-            long n = a.Length;
-            Complex[] y = new Complex[n];
-            if (n == 1)
+            // Format the first matrix into unit-matrix  
+            for (int i = size - 2; i >= 0; i--)
             {
-                y[0] = new Complex(a[0], 0);
-                return y;
+                for (int j = i + 1; j < size; j++)
+                    if (dReverseMatrix[i, j] != 0)
+                    {
+                        c = dReverseMatrix[i, j];
+                        for (int n = j; n < 2 * size; n++)
+                            dReverseMatrix[i, n] -= (c * dReverseMatrix[j, n]);
+                    }
             }
-            Complex w_n = new Complex(Math.Cos(2 * Math.PI / n), Math.Sin(2 * Math.PI / n));
-            Complex w = new Complex(1, 0);
-
-            long[] a_0 = GetHalfOfCoefficients(a, even: true);
-            long[] a_1 = GetHalfOfCoefficients(a, even: false);
-
-            Complex[] y_0 = FFT(a_0);
-            Complex[] y_1 = FFT(a_1);
-
-            for (long k = 0; k < n / 2; k++)
-            {
-                y[k] = y_0[k] + w * y_1[k];
-                y[k + n / 2] = y_0[k] - w * y_1[k];
-                w *= w_n;
-            }
-
-            return y;
+            float[,] dReturn = new float[size, size];
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
+                    dReturn[i, j] = dReverseMatrix[i, j + size];
+            return dReturn;
         }
 
-        private Complex[] PointwiseMultiply(Complex[] v1, Complex[] v2)
+
+        private float MatrixValue(float[,] MatrixList, int Level)
         {
-            if (v1.Length != v2.Length)
-                throw new Exception();
-            Complex[] w = new Complex[v1.Length];
-            for (long i = 0; i < w.Length; i++)
-                w[i] = v1[i] * v2[i];
-            return w;
-        }
-
-        private Complex[] InverseFFT(Complex[] y)
-        {
-            int n = y.Length;
-            Complex[] a = new Complex[n];
-            if (n == 1)
+            float[,] dMatrix = new float[Level, Level];
+            for (int i = 0; i < Level; i++)
+                for (int j = 0; j < Level; j++)
+                    dMatrix[i, j] = MatrixList[i, j];
+            float c, x; int k = 1;
+            for (int i = 0, j = 0; i < Level && j < Level; i++, j++)
             {
-                a[0] = y[0];
-                return a;
+                if (dMatrix[i, j] == 0)
+                {
+                    int m = i;
+                    for (; dMatrix[m, j] == 0; m++) ;
+                    if (m == Level)
+                        return 0;
+                    else
+                    {
+                        // Row change between i-row and m-row           
+                        for (int n = j; n < Level; n++)
+                        {
+                            c = dMatrix[i, n];
+                            dMatrix[i, n] = dMatrix[m, n];
+                            dMatrix[m, n] = c;
+                        }
+                        // Change value pre-value      
+                        k *= (-1);
+                    }
+                }
+                // Set 0 to the current column in the rows after current row   
+                for (int s = Level - 1; s > i; s--)
+                {
+                    x = dMatrix[s, j];
+                    for (int t = j; t < Level; t++)
+                        dMatrix[s, t] -= dMatrix[i, t] * (x / dMatrix[i, j]);
+                }
             }
-            Complex w_n = new Complex(Math.Cos(-2 * Math.PI / n), Math.Sin(-2 * Math.PI / n));
-            Complex w = new Complex(1, 0);
-
-            Complex[] y_0 = GetHalfOfCoefficients(y, even: true);
-            Complex[] y_1 = GetHalfOfCoefficients(y, even: false);
-
-            Complex[] a_0 = InverseFFT(y_0);
-            Complex[] a_1 = InverseFFT(y_1);
-
-            for (int k = 0; k < n / 2; k++)
+            float sn = 1;
+            for (int i = 0; i < Level; i++)
             {
-                a[k] = (a_0[k] + w * a_1[k]);
-                a[k + n / 2] = (a_0[k] - w * a_1[k]);
-                w *= w_n;
+                if (dMatrix[i, i] != 0)
+                    sn *= dMatrix[i, i];
+                else return 0;
             }
-            return a;
-        }
-
-        private T[] GetHalfOfCoefficients<T>(T[] coefficients, bool even)
-        {
-            long start = even ? 0 : 1;
-            T[] halfOfCoefficients = new T[coefficients.Length / 2];
-            for (long i = 0; i < halfOfCoefficients.Length; i++)
-            {
-                halfOfCoefficients[i] = coefficients[start];
-                start += 2;
-            }
-            return halfOfCoefficients;
+            return k * sn;
         }
 
 
