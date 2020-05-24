@@ -69,14 +69,14 @@ namespace LipSync
             int index = 0;
             foreach (var frequency in frequencies)
             {
-                var radians = frequency / (double)samplingRate * Mathf.PI * 2;
+                var radians = frequency / (double) samplingRate * Mathf.PI * 2;
                 Complex response = new Complex(0.0, 0.0);
                 for (int i = 0; i < coefficients.Length; i++)
                 {
                     var c = coefficients[i];
                     response += new Complex(c < 0 ? -c : c, i * radians);
                 }
-                float v = 20 * Mathf.Log10((float)(1.0 / response.abs));
+                float v = 20 * Mathf.Log10((float) (1.0 / response.abs));
                 retval[index++] = v;
             }
             return retval;
@@ -93,7 +93,7 @@ namespace LipSync
             int maximumIterations = MR * MT;
             const double EPSS = 1.0e-7;
             double abx, abp, abm, err;
-            var frac = new Double[] { 0.0, 0.5, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875, 1.0 };
+            var frac = new Double[] {0.0, 0.5, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875, 1.0};
             Complex x = guess;
             for (int iteration = 1; iteration <= maximumIterations; iteration++)
             {
@@ -122,7 +122,8 @@ namespace LipSync
                 abm = gm.abs;
                 if (abp < abm) gp = gm;
 
-                var dx = Math.Max(abp, abm) > 0.0 ? m / gp
+                var dx = Math.Max(abp, abm) > 0.0
+                    ? m / gp
                     : (1 + abx) * new Complex(Mathf.Cos(iteration), Mathf.Sin(iteration));
                 Complex x1 = x - dx;
                 if (x == x1)
@@ -203,22 +204,36 @@ namespace LipSync
             {
                 throw new Exception("Input signal must have a lenght >= lpc order");
             }
-            double[] ret = new double[0];
-            if (order > 0)
+            if (order <= 0)
             {
-                int p = order + 1;
+                throw new Exception("lpc order must greater 0");
+            }
 
-                var nx = Math.Min(p, signal.Length);
-                var x = Correlate(signal, signal);
-                var r = new double[nx];
-                for (int i = 0; i < nx; i++)
+            int p = order + 1;
+            var nx = Math.Min(p, signal.Length);
+            var x = Correlate(signal, signal);
+            var r = new float[nx - 1];
+            var r2 = new float[nx - 1];
+            for (int i = 0; i < nx; i++)
+            {
+                if (i > 0)
                 {
-                    r[i] = x[signal.Length - 1 + i];
+                    r[i - 1] = x[signal.Length - 1 + i];
+                }
+                if (i < nx - 1)
+                {
+                    r2[i] = x[signal.Length - 1 + i];
                 }
             }
-            else
+            ToeplitzMtrix mtrix = new ToeplitzMtrix(r);
+            var inv = mtrix.Inverse();
+            mtrix = new ToeplitzMtrix(inv);
+            var phi = mtrix.Dot(r2);
+            var ret = new double[phi.Length];
+            ret[0] = 1;
+            for (int i = 0; i < phi.Length; i++)
             {
-                ret = new double[] { 1 };
+                ret[i + 1] = phi[i];
             }
             return ret;
         }
@@ -226,7 +241,7 @@ namespace LipSync
 
         private Complex RandomFloat(Complex low, Complex high)
         {
-            float rand = 0.5f;// UnityEngine.Random.Range(0.0f, 1.0f);
+            float rand = 0.5f; // UnityEngine.Random.Range(0.0f, 1.0f);
             Complex d = new Complex(rand);
             Complex k = d * (high - low + 1);
             return low + k;
@@ -247,7 +262,7 @@ namespace LipSync
         {
             if (n == 0)
             {
-                return new Complex[] { Complex.zero };
+                return new Complex[] {Complex.zero};
             }
             Complex[] b = new Complex[n];
             b[0] = a[1];
@@ -286,8 +301,7 @@ namespace LipSync
                     dx = n / (g - f);
                 }
                 x = x - dx;
-                if (dx.abs < tol)
-                    return x;
+                if (dx.abs < tol) return x;
             }
             Debug.LogError("ERROR: Too many iterations!");
             return Complex.zero;
@@ -307,9 +321,28 @@ namespace LipSync
         public Complex[] FindRoots(float[] poly)
         {
             Complex[] cs = new Complex[poly.Length];
-            for (int i = 0; i < cs.Length; i++)
-                cs[i] = new Complex(poly[i]);
+            for (int i = 0; i < cs.Length; i++) cs[i] = new Complex(poly[i]);
             return FindRoots(cs);
+        }
+
+        public Complex[] FindCRoots(float[] poly)
+        {
+            double[] dpoly = poly.Select(x => (double) x).ToArray();
+            return FindCRoots(dpoly);
+        }
+
+        public Complex[] FindCRoots(double[] dpoly)
+        {
+            int len = dpoly.Length;
+            int len2 = (len - 1) * 2;
+            double[] ret = new double[len2];
+            MathToolBox.poly_roots(len, dpoly, ret);
+            Complex[] cpx = new Complex[len - 1];
+            for (int i = 0; i < len - 1; i += 2)
+            {
+                cpx[i] = new Complex(ret[2 * i], ret[2 * i + 1]);
+            }
+            return cpx;
         }
 
         public Complex[] FindRoots(Complex[] poly)
@@ -370,6 +403,5 @@ namespace LipSync
             }
             return ret;
         }
-        
     }
 }

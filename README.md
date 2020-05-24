@@ -15,7 +15,7 @@ LipSync是一个基于Unity的独立、轻量化口型匹配解决方案。它�
 *	分析噪声过于严重的语音数据
 *	分辨某一段声音是语音还是和语音不相关的其他声音
 
-LipSync文件夹中的内容是本插件的主体部分，而UnityChan文件夹中的内容并不是本插件的一部分，它是为了演示LipSync的效果而附带的一套模型资源。她其实是Unity Technology Japan为Unity开发的一个官方形象。如果你想进一步了解UnityChan，可以在[这里][i2]获得她的信息。
+LipSync文件夹中的内容是本插件的主体部分，而UnityChan文件夹中的内容并不是本插件的一部分,是Unity Technology Japan为Unity开发的一个官方形象，它是为了演示LipSync的效果而附带的一套模型资源。
 
 查看实现效果的展示视频， 点击[这里][i1], 笔者已经上传到B站。
 

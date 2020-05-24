@@ -23,7 +23,7 @@ namespace LipSync.Editor
 
         private void OnEnable()
         {
-            if(model==null)
+            if (model == null)
             {
                 model = new LpcModel();
             }
@@ -34,7 +34,7 @@ namespace LipSync.Editor
             GUILayout.BeginVertical();
 
             GUILayout.Space(10);
-            audioClip = (AudioClip)EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
+            audioClip = (AudioClip) EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
 
             if (GUILayout.Button("Analy"))
             {
@@ -42,19 +42,29 @@ namespace LipSync.Editor
                 var split = MakeFrame();
                 Formant(split);
             }
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("root"))
             {
-                float[] poly = new float[] { -8, 12, -6, 1};
+                float[] poly = new float[] {-8, 12, -6, 1};
                 var ret = model.FindRoots(poly);
                 foreach (var it in ret)
                 {
                     Debug.Log(it);
                 }
             }
+            if (GUILayout.Button("c-root"))
+            {
+                double[] poly = new Double[] {-8, 12, -6, 1};
+                var roots = model.FindCRoots(poly);
+                for (int i = 0; i < roots.Length; i++)
+                {
+                    Debug.Log("i: " + roots[i]);
+                }
+            }
             if (GUILayout.Button("correlate"))
             {
-                var a = new float[] { 3, 1, 2, 4, 3, 5, 6, 5, 6, 2 };
-                var v = new float[] { 3, 1, 4, 2 };
+                var a = new float[] {3, 1, 2, 4, 3, 5, 6, 5, 6, 2};
+                var v = new float[] {3, 1, 4, 2};
                 var t = model.Correlate(a, v);
                 string str = "";
                 for (int i = 0; i < t.Length; i++)
@@ -65,21 +75,23 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("toeplitz"))
             {
-                float[] c = new float[] { 3, 4, 2, -6, 7, 3, 1, -3 };
-                ToeplitzMtrix toeplitzMtrix;
-                toeplitzMtrix = new ToeplitzMtrix(c);
+                float[] c = new float[]
+                {
+                    3, 4, 2, -2.6f, 1.7f, 4.3f, 121, 321, 1.3f, 1, -3, 3, 4, 11, 9, -4, 7, 12, 0.3f, -7.0f
+                };
+                ToeplitzMtrix toeplitzMtrix = new ToeplitzMtrix(c);
                 Debug.Log(toeplitzMtrix);
                 var t = toeplitzMtrix.Inverse();
-                int n = (int)Math.Sqrt((double)t.Length);
+                int n = (int) Math.Sqrt((double) t.Length);
                 string msg = "size: " + n;
                 for (int i = 0; i < n; i++)
                 {
                     msg += "\n";
-                    for (int j = 0; j < n; j++)
-                        msg += t[i, j].ToString("f3") + "\t";
+                    for (int j = 0; j < n; j++) msg += t[i, j].ToString("f3") + "\t";
                 }
                 Debug.Log(msg);
             }
+            GUILayout.EndHorizontal();
             GUILayout.Space(10);
             if (!string.IsNullOrEmpty(info))
             {
@@ -144,6 +156,7 @@ namespace LipSync.Editor
             int i = 0;
             float a = 0.67f;
             info = String.Empty;
+            List<double[]> ret = new List<double[]>();
             while (i < splitting.Count())
             {
                 float[] FL = PreEmphasis(splitting[i], a);
@@ -152,9 +165,14 @@ namespace LipSync.Editor
                 {
                     FL[i] = FL[i] * w[i];
                 }
-                var coefficients = model.EstimateLpcCoefficients(FL, 2 + fs / 1000);
-                var formants = model.FindFormants(coefficients, fs);
-                AppendInfo(i, formants);
+                var coefficients = model.Estimate(FL, 2 + fs / 1000);
+                var rts = model.FindCRoots(coefficients);
+                rts = rts.Where(x => x.imag >= 0).ToArray();
+                var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();
+                frqs.Sort();
+                double[] fmts = {frqs[1], frqs[2], frqs[3]};
+                Debug.Log(frqs[1] + " " + frqs[2] + " " + frqs[3]);
+                ret.Add(fmts);
                 i++;
             }
         }

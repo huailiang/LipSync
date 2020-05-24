@@ -1,7 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Security;
+using UnityEngine;
 
 namespace LipSync
 {
+#if !UNITY_IPHONE
+    [SuppressUnmanagedCodeSecurity]
+#endif
     public class MathToolBox
     {
         public enum EPaddleType
@@ -226,5 +232,18 @@ namespace LipSync
                 }
             }
         }
+        
+#if UNITY_IPHONE
+#if UNITY_EDITOR
+        const string ZSolverDLL = "ZSolver";
+#else
+        const string ZSolverDLL = "__Internal";
+#endif
+#else
+        const string ZSolverDLL = "ZSolver";
+#endif
+
+        [DllImport(ZSolverDLL, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void poly_roots(int size, double[] c, double[] z);
     }
 }

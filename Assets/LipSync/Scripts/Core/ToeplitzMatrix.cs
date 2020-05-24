@@ -1,23 +1,34 @@
-﻿namespace LipSync
+﻿using System;
+using UnityEngine;
+
+namespace LipSync
 {
     public class ToeplitzMtrix
     {
-
         private float[,] data;
 
         private int size;
 
         public int Size
         {
-            get { return size; }
+            get
+            {
+                return size;
+            }
         }
 
         public float this[int x, int y]
         {
             get
             {
-                return data != null ? data[x, y] : 0;
+                return data?[x, y] ?? 0;
             }
+        }
+
+        public ToeplitzMtrix(float[,] c)
+        {
+            data = c;
+            size = (int)Mathf.Sqrt(c.Length);
         }
 
         public ToeplitzMtrix(float[] c)
@@ -26,13 +37,13 @@
             int n = size;
             data = new float[n, n];
             for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
-                {
-                    if (i <= j)
-                        data[i, j] = c[j - i];
-                    else
-                        data[i, j] = c[i - j];
-                }
+            for (int j = 0; j < n; j++)
+            {
+                if (i <= j)
+                    data[i, j] = c[j - i];
+                else
+                    data[i, j] = c[i - j];
+            }
         }
 
         public override string ToString()
@@ -41,8 +52,7 @@
             for (int i = 0; i < size; i++)
             {
                 rt += "\n";
-                for (int j = 0; j < size; j++)
-                    rt += this[i, j].ToString("f2") + "\t";
+                for (int j = 0; j < size; j++) rt += this[i, j].ToString("f2") + "\t";
             }
             return rt;
         }
@@ -60,7 +70,8 @@
                 {
                     if (j < size)
                         dReverseMatrix[i, j] = data[i, j];
-                    else dReverseMatrix[i, j] = 0;
+                    else
+                        dReverseMatrix[i, j] = 0;
                 }
                 dReverseMatrix[i, size + i] = 1;
             }
@@ -68,17 +79,19 @@
             {
                 if (dReverseMatrix[i, j] == 0)
                 {
-                    int m = i; for (; data[m, j] == 0; m++) ;
-                    if (m == size) return null;
+                    int m = i;
+                    for (; data[m, j] == 0; m++) ;
+                    if (m == size)
+                        return null;
                     else
                     {
                         // Add i-row with m-row         
-                        for (int n = j; n < 2 * size; n++)
-                            dReverseMatrix[i, n] += dReverseMatrix[m, n];
+                        for (int n = j; n < 2 * size; n++) dReverseMatrix[i, n] += dReverseMatrix[m, n];
                     }
                 }
                 // Format the i-row with "1" start   
-                x = dReverseMatrix[i, j]; if (x != 1)
+                x = dReverseMatrix[i, j];
+                if (x != 1)
                 {
                     for (int n = j; n < 2 * size; n++)
                         if (dReverseMatrix[i, n] != 0)
@@ -88,8 +101,7 @@
                 for (int s = size - 1; s > i; s--)
                 {
                     x = dReverseMatrix[s, j];
-                    for (int t = j; t < 2 * size; t++)
-                        dReverseMatrix[s, t] -= (dReverseMatrix[i, t] * x);
+                    for (int t = j; t < 2 * size; t++) dReverseMatrix[s, t] -= (dReverseMatrix[i, t] * x);
                 }
             }
             // Format the first matrix into unit-matrix  
@@ -99,14 +111,13 @@
                     if (dReverseMatrix[i, j] != 0)
                     {
                         c = dReverseMatrix[i, j];
-                        for (int n = j; n < 2 * size; n++)
-                            dReverseMatrix[i, n] -= (c * dReverseMatrix[j, n]);
+                        for (int n = j; n < 2 * size; n++) dReverseMatrix[i, n] -= (c * dReverseMatrix[j, n]);
                     }
             }
             float[,] dReturn = new float[size, size];
             for (int i = 0; i < size; i++)
-                for (int j = 0; j < size; j++)
-                    dReturn[i, j] = dReverseMatrix[i, j + size];
+            for (int j = 0; j < size; j++)
+                dReturn[i, j] = dReverseMatrix[i, j + size];
             return dReturn;
         }
 
@@ -115,9 +126,10 @@
         {
             float[,] dMatrix = new float[Level, Level];
             for (int i = 0; i < Level; i++)
-                for (int j = 0; j < Level; j++)
-                    dMatrix[i, j] = MatrixList[i, j];
-            float c, x; int k = 1;
+            for (int j = 0; j < Level; j++)
+                dMatrix[i, j] = MatrixList[i, j];
+            float c, x;
+            int k = 1;
             for (int i = 0, j = 0; i < Level && j < Level; i++, j++)
             {
                 if (dMatrix[i, j] == 0)
@@ -143,8 +155,7 @@
                 for (int s = Level - 1; s > i; s--)
                 {
                     x = dMatrix[s, j];
-                    for (int t = j; t < Level; t++)
-                        dMatrix[s, t] -= dMatrix[i, t] * (x / dMatrix[i, j]);
+                    for (int t = j; t < Level; t++) dMatrix[s, t] -= dMatrix[i, t] * (x / dMatrix[i, j]);
                 }
             }
             float sn = 1;
@@ -152,12 +163,13 @@
             {
                 if (dMatrix[i, i] != 0)
                     sn *= dMatrix[i, i];
-                else return 0;
+                else
+                    return 0;
             }
             return k * sn;
         }
 
-        private float[] Dot(float[] v)
+        public float[] Dot(float[] v)
         {
             if (data == null)
             {
@@ -178,7 +190,5 @@
             }
             return ret;
         }
-
     }
-
 }
