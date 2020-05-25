@@ -63,8 +63,8 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("correlate"))
             {
-                var a = new float[] {3, 1, 2, 4, 3, 5, 6, 5, 6, 2};
-                var v = new float[] {3, 1, 4, 2};
+                var a = new float[] { 3, 1, 2, 4, 3, 5, 6, 5, 6, 2 };
+                var v = new float[] { 3, 1, 4, 2 };
                 var t = model.Correlate(a, v);
                 string str = "";
                 for (int i = 0; i < t.Length; i++)
@@ -75,9 +75,9 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("toeplitz"))
             {
-                float[] c = new float[]
+                var c = new double[]
                 {
-                    3, 4, 2, -2.6f, 1.7f, 4.3f, 121, 321, 1.3f, 1, -3, 3, 4, 11, 9, -4, 7, 12, 0.3f, -7.0f
+                    4, -2.6, 1.7, 4.3, 11, 21, 1.3, -3, 4, 11, 9, -4, 7, 12, 0.3, -7.0
                 };
                 ToeplitzMtrix toeplitzMtrix = new ToeplitzMtrix(c);
                 Debug.Log(toeplitzMtrix);
@@ -163,7 +163,7 @@ namespace LipSync.Editor
                 float[] w = MathToolBox.GenerateWindow(window, MathToolBox.EWindowType.Hamming);
                 for (int j = 0; j < window; j++)
                 {
-                    FL[i] = FL[i] * w[i];
+                    FL[j] = FL[j] * w[j];
                 }
                 var coefficients = model.Estimate(FL, 2 + fs / 1000);
                 var rts = model.FindCRoots(coefficients);

@@ -212,24 +212,25 @@ namespace LipSync
             int p = order + 1;
             var nx = Math.Min(p, signal.Length);
             var x = Correlate(signal, signal);
-            var r = new float[nx - 1];
-            var r2 = new float[nx - 1];
+
+            var r1 = new double[nx - 1];
+            var r2 = new double[nx - 1];
             for (int i = 0; i < nx; i++)
             {
                 if (i > 0)
                 {
-                    r[i - 1] = x[signal.Length - 1 + i];
+                    r1[i - 1] = x[signal.Length - 1 + i];
                 }
                 if (i < nx - 1)
                 {
                     r2[i] = x[signal.Length - 1 + i];
                 }
             }
-            ToeplitzMtrix mtrix = new ToeplitzMtrix(r);
+            ToeplitzMtrix mtrix = new ToeplitzMtrix(r1);
             var inv = mtrix.Inverse();
             mtrix = new ToeplitzMtrix(inv);
             var phi = mtrix.Dot(r2);
-            var ret = new double[phi.Length];
+            var ret = new double[phi.Length + 1];
             ret[0] = 1;
             for (int i = 0; i < phi.Length; i++)
             {

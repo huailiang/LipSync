@@ -1,11 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace LipSync
 {
     public class ToeplitzMtrix
     {
-        private float[,] data;
+        private double[,] data;
 
         private int size;
 
@@ -17,7 +16,7 @@ namespace LipSync
             }
         }
 
-        public float this[int x, int y]
+        public double this[int x, int y]
         {
             get
             {
@@ -25,17 +24,17 @@ namespace LipSync
             }
         }
 
-        public ToeplitzMtrix(float[,] c)
+        public ToeplitzMtrix(double[,] c)
         {
             data = c;
             size = (int)Mathf.Sqrt(c.Length);
         }
 
-        public ToeplitzMtrix(float[] c)
+        public ToeplitzMtrix(double[] c)
         {
             size = c.Length;
             int n = size;
-            data = new float[n, n];
+            data = new double[n, n];
             for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
             {
@@ -58,12 +57,12 @@ namespace LipSync
         }
 
         // 求逆
-        public float[,] Inverse()
+        public double[,] Inverse()
         {
-            float dMatrixValue = MatrixValue(data, size);
+            double dMatrixValue = MatrixValue(data, size);
             if (dMatrixValue == 0) return null;
-            float[,] dReverseMatrix = new float[size, 2 * size];
-            float x, c;
+            double[,] dReverseMatrix = new double[size, 2 * size];
+            double x, c;
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < 2 * size; j++)
@@ -114,7 +113,7 @@ namespace LipSync
                         for (int n = j; n < 2 * size; n++) dReverseMatrix[i, n] -= (c * dReverseMatrix[j, n]);
                     }
             }
-            float[,] dReturn = new float[size, size];
+            double[,] dReturn = new double[size, size];
             for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
                 dReturn[i, j] = dReverseMatrix[i, j + size];
@@ -122,13 +121,13 @@ namespace LipSync
         }
 
 
-        private float MatrixValue(float[,] MatrixList, int Level)
+        private double MatrixValue(double[,] MatrixList, int Level)
         {
-            float[,] dMatrix = new float[Level, Level];
+            double[,] dMatrix = new double[Level, Level];
             for (int i = 0; i < Level; i++)
             for (int j = 0; j < Level; j++)
                 dMatrix[i, j] = MatrixList[i, j];
-            float c, x;
+            double c, x;
             int k = 1;
             for (int i = 0, j = 0; i < Level && j < Level; i++, j++)
             {
@@ -158,7 +157,7 @@ namespace LipSync
                     for (int t = j; t < Level; t++) dMatrix[s, t] -= dMatrix[i, t] * (x / dMatrix[i, j]);
                 }
             }
-            float sn = 1;
+            double sn = 1;
             for (int i = 0; i < Level; i++)
             {
                 if (dMatrix[i, i] != 0)
@@ -169,7 +168,7 @@ namespace LipSync
             return k * sn;
         }
 
-        public float[] Dot(float[] v)
+        public double[] Dot(double[] v)
         {
             if (data == null)
             {
@@ -179,7 +178,7 @@ namespace LipSync
             {
                 throw new System.Exception("length is not equal matrix size");
             }
-            float[] ret = new float[size];
+            double[] ret = new double[size];
 
             for (int i = 0; i < size; i++)
             {
