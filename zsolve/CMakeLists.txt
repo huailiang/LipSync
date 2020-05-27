@@ -57,7 +57,9 @@ if (APPLE)
         add_library(XRoot STATIC
            ${CORE_GSL}
         )
-		set_xcode_property (ZSolver IPHONEOS_DEPLOYMENT_TARGET "7.0" "all")
+        macro (set_xcode_property TARGET XCODE_PROPERTY XCODE_VALUE)
+		set_xcode_property (ZSolver IPHONEOS_DEPLOYMENT_TARGET "8.0" "all")
+        endmacro (set_xcode_property)
     else ()
         set(CMAKE_OSX_ARCHITECTURES "$(ARCHS_STANDARD_64_BIT)")
         add_library(ZSolver MODULE
@@ -77,9 +79,15 @@ else ( )
 endif ( )
 
 
-target_compile_definitions (ZSolver PRIVATE COMPATIBLE_FORMAT)
+# target_compile_definitions (ZSolver PRIVATE COMPATIBLE_FORMAT)
 
-if(UINT_ESPECIALLY)
-    ADD_DEFINITIONS(-DUINT_ESPECIALLY)
-endif()
+# if(UINT_ESPECIALLY)
+#     ADD_DEFINITIONS(-DUINT_ESPECIALLY)
+# endif()
+
+# if ( WIN32 )
+#     target_link_libraries(ZSolver ws2_32)
+# else( )
+#     target_link_libraries(ZSolver m)
+# endif()
 	
