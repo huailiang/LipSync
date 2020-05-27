@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -6,6 +7,15 @@ namespace LipSync
 {
     public class LpcModel
     {
+        public int window, step, fs;
+        private float[] audioBuffer;
+
+        public LpcModel()
+        {
+            window = 30;
+            step = 15;
+        }
+        
         public double[] Estimate(float[] signal, int order)
         {
             if (order > signal.Length)
@@ -46,8 +56,7 @@ namespace LipSync
             }
             return ret;
         }
-
-
+        
         private Complex RandomFloat(Complex low, Complex high)
         {
             float rand = UnityEngine.Random.Range(0.0f, 1.0f);
@@ -126,23 +135,18 @@ namespace LipSync
 
         public Complex[] FindRoots(float[] poly)
         {
-            Complex[] cs = new Complex[poly.Length];
-            for (int i = 0; i < cs.Length; i++) cs[i] = new Complex(poly[i]);
+            int len = poly.Length;
+            Complex[] cs = new Complex[len];
+            for (int i = 0; i < len; i++) cs[len - i - 1] = new Complex(poly[i]);
             return FindRoots(cs);
         }
 
-        public Complex[] FindCRoots(float[] poly)
+        public Complex[] FindCRoots(IEnumerable<double> dpoly)
         {
-            double[] dpoly = poly.Select(x => (double) x).ToArray();
-            return FindCRoots(dpoly);
-        }
-
-        public Complex[] FindCRoots(double[] dpoly)
-        {
-            int len = dpoly.Length;
+            int len = dpoly.Count();
             int len2 = (len - 1) * 2;
             double[] ret = new double[len2];
-            MathToolBox.poly_roots(len, dpoly, ret);
+            MathToolBox.poly_roots(len, dpoly.Reverse().ToArray(), ret);
             Complex[] cpx = new Complex[len - 1];
             for (int i = 0; i < len - 1; i++)
             {
@@ -151,7 +155,7 @@ namespace LipSync
             return cpx;
         }
 
-        public Complex[] FindRoots(Complex[] poly)
+        private Complex[] FindRoots(Complex[] poly)
         {
             int n = poly.Length - 1;
             int N = n;
@@ -208,6 +212,69 @@ namespace LipSync
                 }
             }
             return ret;
+        }
+        
+
+        private List<float[]> MakeFrame()
+        {
+            step = (15 * fs) / 1000;
+            window = (30 * fs) / 1000;
+            List<float[]> splitting = new List<float[]>();
+            int i = 0;
+            while (i <= audioBuffer.Length - window)
+            {
+                float[] arr = new float[window];
+                for (int j = i; j < i + window; j++)
+                {
+                    arr[j - i] = audioBuffer[j];
+                }
+                splitting.Add(arr);
+                i += step;
+            }
+            return splitting;
+        }
+
+        private float[] PreEmphasis(float[] x, float a)
+        {
+            var temp = new float[window];
+            int i = 1;
+            while (i <= window - 2)
+            {
+                temp[i - 1] = x[i] - a * x[i - 1];
+                i++;
+            }
+            return temp;
+        }
+
+        private void Formants(List<float[]> splitting)
+        {
+            int i = 0;
+            float a = 0.67f;
+            List<double[]> ret = new List<double[]>();
+            while (i < splitting.Count())
+            {
+                float[] FL = PreEmphasis(splitting[i], a);
+                float[] w = MathToolBox.GenerateWindow(window, MathToolBox.EWindowType.Hamming);
+                for (int j = 0; j < window; j++)
+                {
+                    FL[j] = FL[j] * w[j];
+                }
+                var coefficients = Estimate(FL, 2 + fs / 1000);
+                var rts = FindCRoots(coefficients).Where(x => x.imag >= 0.0);
+                var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();
+                frqs.Sort();
+                double[] fmts = { frqs[1], frqs[2], frqs[3] };
+                Debug.Log(frqs[1] + " " + frqs[2] + " " + frqs[3]);
+                ret.Add(fmts);
+                i++;
+            }
+        }
+
+        public void Analy(float[] buffer)
+        {
+            this.audioBuffer = buffer;
+            var split = MakeFrame();
+            Formants(split);
         }
     }
 }

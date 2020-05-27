@@ -192,7 +192,7 @@ namespace LipSync.Editor
                         }
 
                         List<AnimationClip> tempClipList = new List<AnimationClip>(audioClipToBake.Count);
-                        for (int j = 0; j < /*audioClipToBake.Count*/1; ++j)
+                        for (int j = 0; j < audioClipToBake.Count; ++j)
                         {
                             AnimationClip clip = new AnimationClip();
                             AnimationCurve[] curveArray = new AnimationCurve[currentVowels.Length];

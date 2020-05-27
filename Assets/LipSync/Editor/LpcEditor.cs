@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -35,12 +34,25 @@ namespace LipSync.Editor
 
             GUILayout.Space(10);
             audioClip = (AudioClip)EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
-
+            EditorGUILayout.BeginVertical(EditorStyles.textField);
+            {
+                if (audioClip)
+                {
+                    var pat = AssetDatabase.GetAssetPath(audioClip);
+                    pat = pat.Substring(pat.LastIndexOf('/') + 1);
+                    EditorGUILayout.LabelField(pat);
+                    EditorGUILayout.LabelField("采样率: " + audioClip.frequency);
+                    EditorGUILayout.LabelField("声 道  : " + audioClip.channels);
+                    model.fs = audioClip.frequency;
+                }
+            }
+            EditorGUILayout.EndVertical();
+            model.window = EditorGUILayout.IntField("window", model.window);
+            model.step = EditorGUILayout.IntField("step", model.step);
             if (GUILayout.Button("Analy"))
             {
                 Normalize();
-                var split = MakeFrame();
-                Formant(split);
+                model.Analy(audioBuffer);
             }
             GUILayout.Space(4);
             GUILayout.BeginHorizontal();
@@ -55,7 +67,7 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("c-root"))
             {
-                double[] poly = new Double[] { -4, 0, 1 };
+                double[] poly = new Double[] { 4, 0, 1 };
                 var roots = model.FindCRoots(poly);
                 for (int i = 0; i < roots.Length; i++)
                 {
@@ -118,64 +130,7 @@ namespace LipSync.Editor
             }
         }
 
-
-        private List<float[]> MakeFrame()
-        {
-            step = (15 * fs) / 1000;
-            window = (30 * fs) / 1000;
-            List<float[]> splitting = new List<float[]>();
-            int i = 0;
-            while (i <= audioBuffer.Length - window)
-            {
-                float[] arr = new float[window];
-                for (int j = i; j < i + window; j++)
-                {
-                    arr[j - i] = audioBuffer[j];
-                }
-                splitting.Add(arr);
-                i += step;
-            }
-            return splitting;
-        }
-
-        private float[] PreEmphasis(float[] x, float a)
-        {
-            var temp = new float[window];
-            int i = 1;
-            while (i <= window - 2)
-            {
-                temp[i - 1] = x[i] - a * x[i - 1];
-                i++;
-            }
-            return temp;
-        }
-
-        private void Formant(List<float[]> splitting)
-        {
-            int i = 0;
-            float a = 0.67f;
-            info = String.Empty;
-            List<double[]> ret = new List<double[]>();
-            while (i < splitting.Count())
-            {
-                float[] FL = PreEmphasis(splitting[i], a);
-                float[] w = MathToolBox.GenerateWindow(window, MathToolBox.EWindowType.Hamming);
-                for (int j = 0; j < window; j++)
-                {
-                    FL[j] = FL[j] * w[j];
-                }
-                var coefficients = model.Estimate(FL, 2 + fs / 1000);
-                coefficients = coefficients.Reverse().ToArray();
-                var rts = model.FindCRoots(coefficients).Where(x => x.imag >= 0.0);
-                var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();
-                frqs.Sort();
-                double[] fmts = { frqs[1], frqs[2], frqs[3] };
-                Debug.Log(frqs[1] + " " + frqs[2] + " " + frqs[3]);
-                ret.Add(fmts);
-                i++;
-            }
-        }
-
+        
 
         private void AppendInfo(int idx, double[] formants)
         {
