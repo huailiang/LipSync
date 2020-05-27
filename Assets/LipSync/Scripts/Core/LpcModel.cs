@@ -10,12 +10,7 @@ namespace LipSync
         public int window, step, fs;
         private float[] audioBuffer;
 
-        public LpcModel()
-        {
-            window = 30;
-            step = 15;
-        }
-        
+
         public double[] Estimate(float[] signal, int order)
         {
             if (order > signal.Length)
@@ -56,7 +51,7 @@ namespace LipSync
             }
             return ret;
         }
-        
+
         private Complex RandomFloat(Complex low, Complex high)
         {
             float rand = UnityEngine.Random.Range(0.0f, 1.0f);
@@ -213,12 +208,10 @@ namespace LipSync
             }
             return ret;
         }
-        
+
 
         private List<float[]> MakeFrame()
         {
-            step = (15 * fs) / 1000;
-            window = (30 * fs) / 1000;
             List<float[]> splitting = new List<float[]>();
             int i = 0;
             while (i <= audioBuffer.Length - window)
@@ -246,7 +239,7 @@ namespace LipSync
             return temp;
         }
 
-        private void Formants(List<float[]> splitting)
+        private List<double[]> Formants(List<float[]> splitting)
         {
             int i = 0;
             float a = 0.67f;
@@ -264,17 +257,19 @@ namespace LipSync
                 var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();
                 frqs.Sort();
                 double[] fmts = { frqs[1], frqs[2], frqs[3] };
-                Debug.Log(frqs[1] + " " + frqs[2] + " " + frqs[3]);
                 ret.Add(fmts);
                 i++;
             }
+            return ret;
         }
 
-        public void Analy(float[] buffer)
+        public List<double[]> Analy(float[] buffer, int window, int step)
         {
+            this.step = (step * fs);
+            this.window = (window * fs);
             this.audioBuffer = buffer;
             var split = MakeFrame();
-            Formants(split);
+            return Formants(split);
         }
     }
 }

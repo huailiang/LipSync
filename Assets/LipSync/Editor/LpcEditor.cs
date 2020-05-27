@@ -18,13 +18,15 @@ namespace LipSync.Editor
         private LpcModel model;
         private float[] audioBuffer;
         private int window, step, fs;
-        private string info;
+        private Texture2D tex;
 
         private void OnEnable()
         {
             if (model == null)
             {
                 model = new LpcModel();
+                window = 30;
+                step = 15;
             }
         }
 
@@ -34,25 +36,43 @@ namespace LipSync.Editor
 
             GUILayout.Space(10);
             audioClip = (AudioClip)EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
+            GUILayout.Space(4);
             EditorGUILayout.BeginVertical(EditorStyles.textField);
             {
                 if (audioClip)
                 {
                     var pat = AssetDatabase.GetAssetPath(audioClip);
                     pat = pat.Substring(pat.LastIndexOf('/') + 1);
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.BeginVertical();
                     EditorGUILayout.LabelField(pat);
-                    EditorGUILayout.LabelField("采样率: " + audioClip.frequency);
+                    EditorGUILayout.LabelField(string.Format("时 长  : {0:f2}", audioClip.length));
                     EditorGUILayout.LabelField("声 道  : " + audioClip.channels);
+                    int steps = CulSteps(out var w, out var s);
+                    EditorGUILayout.LabelField("帧 数  : " + steps);
+                    EditorGUILayout.LabelField(string.Format("窗 口  : {0}帧， {1:f2}秒", w, s));
+                    EditorGUILayout.LabelField("采样率 : " + audioClip.frequency);
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space();
+                    tex = AssetPreview.GetAssetPreview(audioClip);
+                    GUIContent content = new GUIContent(tex, "wave");
+                    EditorGUILayout.LabelField(content, GUILayout.MinHeight(120));
+                    EditorGUILayout.EndHorizontal();
                     model.fs = audioClip.frequency;
                 }
             }
             EditorGUILayout.EndVertical();
-            model.window = EditorGUILayout.IntField("window", model.window);
-            model.step = EditorGUILayout.IntField("step", model.step);
+            window = EditorGUILayout.IntField("window", window);
+            step = EditorGUILayout.IntField("step", step);
+            GUILayout.Space(4);
             if (GUILayout.Button("Analy"))
             {
                 Normalize();
-                model.Analy(audioBuffer);
+                var rst = model.Analy(audioBuffer, window, step);
+                for (int i = 0; i < rst.Count; i++)
+                {
+                    Debug.Log(string.Format("{0}: {1:f2} {2:f2} {3:f2}", i, rst[i][0], rst[i][1], rst[i][2]));
+                }
             }
             GUILayout.Space(4);
             GUILayout.BeginHorizontal();
@@ -104,11 +124,6 @@ namespace LipSync.Editor
                 Debug.Log(msg);
             }
             GUILayout.EndHorizontal();
-            GUILayout.Space(10);
-            if (!string.IsNullOrEmpty(info))
-            {
-                GUILayout.TextArea(info);
-            }
             GUILayout.EndVertical();
         }
 
@@ -117,7 +132,7 @@ namespace LipSync.Editor
         {
             float len = audioClip.length;
             fs = audioClip.frequency;
-            int count = (int) (fs * audioClip.length);
+            int count = (int)(fs * audioClip.length);
             Debug.Log(fs + "  " + len);
             audioBuffer = new float[count];
             audioClip.GetData(audioBuffer, 0);
@@ -130,15 +145,29 @@ namespace LipSync.Editor
             }
         }
 
-        
 
-        private void AppendInfo(int idx, double[] formants)
+        private int CulSteps(out float w, out float sec)
         {
-            info += idx.ToString("N2");
-            for (int i = 0; i < formants.Length; i++)
+            int step = 0;
+            float i = 0;
+            int hz = audioClip.frequency;
+            float ax = hz / 1000.0f;
+            float win2 = window * ax;
+            float step2 = this.step * ax;
+            float last = hz * audioClip.length - win2;
+            while (i < last)
             {
-                info += formants[i].ToString("f3") + " ";
+                step++;
+                i += step2;
             }
+            // 一个窗口的帧数
+            w = window * ax;
+            // 一个窗口的对应秒数
+            sec = w / hz;
+
+            return step;
         }
+
     }
+
 }
