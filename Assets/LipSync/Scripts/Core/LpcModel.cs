@@ -31,7 +31,7 @@ namespace LipSync
                 }
                 if (i < nx - 1)
                 {
-                    r2[i] = x[signal.Length - 1 + i];
+                    r2[i] = -x[signal.Length - 1 + i];
                 }
             }
             ToeplitzMtrix mtrix = new ToeplitzMtrix(r1);
@@ -50,7 +50,7 @@ namespace LipSync
 
         private Complex RandomFloat(Complex low, Complex high)
         {
-            float rand = 0.5f; // UnityEngine.Random.Range(0.0f, 1.0f);
+            float rand = UnityEngine.Random.Range(0.0f, 1.0f);
             Complex d = new Complex(rand);
             Complex k = d * (high - low + 1);
             return low + k;
@@ -71,7 +71,7 @@ namespace LipSync
         {
             if (n == 0)
             {
-                return new Complex[] {Complex.zero};
+                return new Complex[] { Complex.zero };
             }
             Complex[] b = new Complex[n];
             b[0] = a[1];
@@ -92,10 +92,7 @@ namespace LipSync
                 Complex[] fderivativetemp = PolyDerivative(a, n);
                 Complex fderivative = Evalpoly(x, fderivativetemp, n - 1);
                 Complex sderivative = Evalpoly(x, PolyDerivative(fderivativetemp, n - 1), n - 2);
-                if (poly.abs < tol)
-                {
-                    return x;
-                }
+                if (poly.abs < tol) return x;
 
                 Complex g = fderivative / poly;
                 Complex h = g * g - sderivative / poly;
@@ -147,7 +144,7 @@ namespace LipSync
             double[] ret = new double[len2];
             MathToolBox.poly_roots(len, dpoly, ret);
             Complex[] cpx = new Complex[len - 1];
-            for (int i = 0; i < len - 1; i += 2)
+            for (int i = 0; i < len - 1; i++)
             {
                 cpx[i] = new Complex(ret[2 * i], ret[2 * i + 1]);
             }
@@ -177,7 +174,7 @@ namespace LipSync
         /// <param name="a">Input sequences.</param>
         /// <param name="v">Input sequences.</param>
         /// <returns>iscrete cross-correlation of `a` and `v`</returns>
-        public float[] Correlate(float[] a, float[] v)
+        public double[] Correlate(float[] a, float[] v)
         {
             if (a.Length < v.Length)
             {
@@ -185,7 +182,7 @@ namespace LipSync
             }
 
             int n = a.Length + v.Length - 1;
-            float[] ret = new float[n];
+            double[] ret = new double[n];
             for (int i = 0; i < n; i++)
             {
                 ret[i] = 0;

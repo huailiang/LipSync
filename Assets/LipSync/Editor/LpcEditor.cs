@@ -34,7 +34,7 @@ namespace LipSync.Editor
             GUILayout.BeginVertical();
 
             GUILayout.Space(10);
-            audioClip = (AudioClip) EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
+            audioClip = (AudioClip)EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
 
             if (GUILayout.Button("Analy"))
             {
@@ -42,10 +42,11 @@ namespace LipSync.Editor
                 var split = MakeFrame();
                 Formant(split);
             }
+            GUILayout.Space(4);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("root"))
             {
-                float[] poly = new float[] {-8, 12, -6, 1};
+                float[] poly = new float[] { -4, 0, 1 };
                 var ret = model.FindRoots(poly);
                 foreach (var it in ret)
                 {
@@ -54,7 +55,7 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("c-root"))
             {
-                double[] poly = new Double[] {-8, 12, -6, 1};
+                double[] poly = new Double[] { -4, 0, 1 };
                 var roots = model.FindCRoots(poly);
                 for (int i = 0; i < roots.Length; i++)
                 {
@@ -63,13 +64,12 @@ namespace LipSync.Editor
             }
             if (GUILayout.Button("correlate"))
             {
-                var a = new float[] { 3, 1, 2, 4, 3, 5, 6, 5, 6, 2 };
-                var v = new float[] { 3, 1, 4, 2 };
-                var t = model.Correlate(a, v);
+                var a = new float[] { 0.3f, 0.1f, 0.2f, 0.4f, 0.3f, 0.5f, -1.6f, -2.5f, 1.6f, 3.2f, 1.34f, -4.1f, -5.34f };
+                var t = model.Correlate(a, a);
                 string str = "";
                 for (int i = 0; i < t.Length; i++)
                 {
-                    str += t[i] + " ";
+                    str += t[i].ToString("f3") + " ";
                 }
                 Debug.Log(str);
             }
@@ -82,7 +82,7 @@ namespace LipSync.Editor
                 ToeplitzMtrix toeplitzMtrix = new ToeplitzMtrix(c);
                 Debug.Log(toeplitzMtrix);
                 var t = toeplitzMtrix.Inverse();
-                int n = (int) Math.Sqrt((double) t.Length);
+                int n = (int)Math.Sqrt((double)t.Length);
                 string msg = "size: " + n;
                 for (int i = 0; i < n; i++)
                 {
@@ -111,7 +111,6 @@ namespace LipSync.Editor
             audioClip.GetData(audioBuffer, 0);
             float max = audioBuffer.Max();
             float min = audioBuffer.Min();
-            Debug.Log("last: " + audioBuffer[count - 1] + " " + max + " " + min);
             max = Mathf.Max(max, -min);
             for (int i = 0; i < count; i++)
             {
@@ -166,11 +165,11 @@ namespace LipSync.Editor
                     FL[j] = FL[j] * w[j];
                 }
                 var coefficients = model.Estimate(FL, 2 + fs / 1000);
-                var rts = model.FindCRoots(coefficients);
-                rts = rts.Where(x => x.imag >= 0).ToArray();
+                coefficients = coefficients.Reverse().ToArray();
+                var rts = model.FindCRoots(coefficients).Where(x => x.imag >= 0.0);
                 var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();
                 frqs.Sort();
-                double[] fmts = {frqs[1], frqs[2], frqs[3]};
+                double[] fmts = { frqs[1], frqs[2], frqs[3] };
                 Debug.Log(frqs[1] + " " + frqs[2] + " " + frqs[3]);
                 ret.Add(fmts);
                 i++;

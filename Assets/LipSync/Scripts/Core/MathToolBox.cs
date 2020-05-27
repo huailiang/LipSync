@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security;
 using UnityEngine;
 
@@ -124,7 +123,6 @@ namespace LipSync
                         lastPeak = data[i];
                         lastPeakPosition = i;
                     }
-
                     isIncreasing = false;
                 }
                
@@ -163,7 +161,7 @@ namespace LipSync
         }
 
         /*
-         * https://blog.csdn.net/qq_30404573/article/details/86697057
+         * https://docs.scipy.org/doc/scipy-0.19.1/reference/signal.html
          */
         public static float[] GenerateWindow(int size, EWindowType windowType)
         {
@@ -179,11 +177,11 @@ namespace LipSync
                     break;
                 case EWindowType.Hamming:
                     for (int i = 0; i < size; ++i)
-                        result[i] = 0.53836f - 0.46164f * Mathf.Cos((2 * Mathf.PI * i) / size);
+                        result[i] = 0.54f - 0.46f * Mathf.Cos((2 * Mathf.PI * i) / (size - 1));
                     break;
                 case EWindowType.Hanning:
                     for (int i = 0; i < size; ++i)
-                        result[i] = (float)(0.5f * (1.0 - Mathf.Cos((2 * Mathf.PI * i) / size)));
+                        result[i] = 0.5f - 0.5f * Mathf.Cos((2 * Mathf.PI * i) / (size - 1));
                     break;
                 case EWindowType.BlackMan:
                     for (int i = 0; i < size; ++i)
