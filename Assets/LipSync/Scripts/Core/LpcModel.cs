@@ -256,7 +256,7 @@ namespace LipSync
                 var rts = FindCRoots(coefficients).Where(x => x.imag >= 0.0);
                 var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();
                 frqs.Sort();
-                double[] fmts = { frqs[1], frqs[2], frqs[3] };
+                double[] fmts = { frqs[1], frqs[2] };
                 ret.Add(fmts);
                 i++;
             }
@@ -265,11 +265,13 @@ namespace LipSync
 
         public List<double[]> Analy(float[] buffer, int window, int step)
         {
-            this.step = (step * fs);
-            this.window = (window * fs);
+            this.step = (step * fs) / 1000;
+            this.window = (window * fs) / 1000;
             this.audioBuffer = buffer;
             var split = MakeFrame();
             return Formants(split);
         }
+
+       
     }
 }

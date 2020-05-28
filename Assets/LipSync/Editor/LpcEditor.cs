@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace LipSync.Editor
         static void LpcShow()
         {
             var win = GetWindow<LpcEditor>();
+            win.titleContent = new GUIContent("lPC");
             win.Show();
         }
 
@@ -19,6 +21,11 @@ namespace LipSync.Editor
         private float[] audioBuffer;
         private int window, step, fs;
         private Texture2D tex;
+        private ERecognizerLanguage language;
+        string[] selectedVowels = null;
+        float[] currentVowelFormantCeilValues;
+        string vowelsInfo = "";
+
 
         private void OnEnable()
         {
@@ -28,6 +35,7 @@ namespace LipSync.Editor
                 window = 30;
                 step = 15;
             }
+            language = ERecognizerLanguage.Japanese;
         }
 
         private void OnGUI()
@@ -64,15 +72,25 @@ namespace LipSync.Editor
             EditorGUILayout.EndVertical();
             window = EditorGUILayout.IntField("window", window);
             step = EditorGUILayout.IntField("step", step);
+            language = (ERecognizerLanguage)EditorGUILayout.EnumPopup("language", language);
+            switch (language)
+            {
+                case ERecognizerLanguage.Japanese:
+                    selectedVowels = LipSyncRecognizer.vowelsByFormantJP;
+                    currentVowelFormantCeilValues = LipSyncRecognizer.vowelFormantFloorJP;
+                    break;
+                case ERecognizerLanguage.Chinese:
+                    selectedVowels = LipSyncRecognizer.vowelsByFormantCN;
+                    currentVowelFormantCeilValues = LipSyncRecognizer.vowelFormantFloorCN;
+                    break;
+            }
             GUILayout.Space(4);
+
             if (GUILayout.Button("Analy"))
             {
                 Normalize();
                 var rst = model.Analy(audioBuffer, window, step);
-                for (int i = 0; i < rst.Count; i++)
-                {
-                    Debug.Log(string.Format("{0}: {1:f2} {2:f2} {3:f2}", i, rst[i][0], rst[i][1], rst[i][2]));
-                }
+                VowelsInfo(rst);
             }
             GUILayout.Space(4);
             GUILayout.BeginHorizontal();
@@ -124,6 +142,9 @@ namespace LipSync.Editor
                 Debug.Log(msg);
             }
             GUILayout.EndHorizontal();
+
+            GUILayout.Space(8);
+            GUILayout.Label(vowelsInfo);
             GUILayout.EndVertical();
         }
 
@@ -166,6 +187,25 @@ namespace LipSync.Editor
             sec = w / hz;
 
             return step;
+        }
+
+        public void VowelsInfo(List<double[]> formants)
+        {
+            vowelsInfo = "";
+            for (int j = 0; j < formants.Count; j++)
+            {
+                string reslt = "- ";
+                int len = currentVowelFormantCeilValues.Length;
+                for (int i = 0; i < len; ++i)
+                {
+                    if (formants[j][0] > currentVowelFormantCeilValues[i])
+                    {
+                        reslt = selectedVowels[i] + " ";
+                    }
+                }
+                vowelsInfo += reslt;
+                if (j % 50 == 49) vowelsInfo += "\n";
+            }
         }
 
     }
