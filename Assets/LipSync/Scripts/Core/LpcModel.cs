@@ -41,7 +41,8 @@ namespace LipSync
             }
             ToeplitzMtrix mtrix = new ToeplitzMtrix(r1);
             var inv = mtrix.Inverse();
-            mtrix = new ToeplitzMtrix(inv);
+            if (inv != null)
+                mtrix = new ToeplitzMtrix(inv);
             var phi = mtrix.Dot(r2);
             var ret = new double[phi.Length + 1];
             ret[0] = 1;
@@ -252,6 +253,7 @@ namespace LipSync
                 {
                     FL[j] = FL[j] * w[j];
                 }
+                Debug.Log(i);
                 var coefficients = Estimate(FL, 2 + fs / 1000);
                 var rts = FindCRoots(coefficients).Where(x => x.imag >= 0.0);
                 var frqs = rts.Select(x => x.arg * (fs / (2 * Mathf.PI))).ToList();

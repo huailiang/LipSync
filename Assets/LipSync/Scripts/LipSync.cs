@@ -27,14 +27,12 @@ namespace LipSync
         protected string[] currentVowels;
         protected Dictionary<string, int> vowelToIndexDict = new Dictionary<string, int>();
         protected int[] propertyIndexs = new int[MAX_BLEND_VALUE_COUNT];
-        protected float blendValuesSum;
 
         protected string recognizeResult;
         protected float[] targetBlendValues = new float[MAX_BLEND_VALUE_COUNT];
         protected float[] currentBlendValues = new float[MAX_BLEND_VALUE_COUNT];
         private Visualization visualization;
         public Text recognizeText;
-
 
 
         public void InitializeRecognizer()
@@ -74,11 +72,6 @@ namespace LipSync
             if (recognizeResult != null)
             {
                 targetBlendValues[vowelToIndexDict[recognizeResult]] = 1.0f;
-            }
-            blendValuesSum = 0.0f;
-            for (int j = 0; j < currentBlendValues.Length; ++j)
-            {
-                blendValuesSum += currentBlendValues[j];
             }
             for (int k = 0; k < currentBlendValues.Length; ++k)
             {

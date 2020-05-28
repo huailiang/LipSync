@@ -26,6 +26,7 @@ namespace LipSync.Editor
         float[] currentVowelFormantCeilValues;
         string vowelsInfo = "";
 
+        private bool debugFolder;
 
         private void OnEnable()
         {
@@ -36,12 +37,12 @@ namespace LipSync.Editor
                 step = 15;
             }
             language = ERecognizerLanguage.Japanese;
+            debugFolder = true;
         }
 
         private void OnGUI()
         {
             GUILayout.BeginVertical();
-
             GUILayout.Space(10);
             audioClip = (AudioClip)EditorGUILayout.ObjectField("Audio Clip", audioClip, typeof(AudioClip), false);
             GUILayout.Space(4);
@@ -93,55 +94,59 @@ namespace LipSync.Editor
                 VowelsInfo(rst);
             }
             GUILayout.Space(4);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("root"))
+            debugFolder = EditorGUILayout.Foldout(debugFolder, "debug tools");
+            if (debugFolder)
             {
-                float[] poly = new float[] { -4, 0, 1 };
-                var ret = model.FindRoots(poly);
-                foreach (var it in ret)
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("root"))
                 {
-                    Debug.Log(it);
+                    float[] poly = new float[] { -4, 0, 1 };
+                    var ret = model.FindRoots(poly);
+                    foreach (var it in ret)
+                    {
+                        Debug.Log(it);
+                    }
                 }
-            }
-            if (GUILayout.Button("c-root"))
-            {
-                double[] poly = new Double[] { 4, 0, 1 };
-                var roots = model.FindCRoots(poly);
-                for (int i = 0; i < roots.Length; i++)
+                if (GUILayout.Button("c-root"))
                 {
-                    Debug.Log("i: " + roots[i]);
+                    double[] poly = new Double[] { 4, 0, 1 };
+                    var roots = model.FindCRoots(poly);
+                    for (int i = 0; i < roots.Length; i++)
+                    {
+                        Debug.Log("i: " + roots[i]);
+                    }
                 }
-            }
-            if (GUILayout.Button("correlate"))
-            {
-                var a = new float[] { 0.3f, 0.1f, 0.2f, 0.4f, 0.3f, 0.5f, -1.6f, -2.5f, 1.6f, 3.2f, 1.34f, -4.1f, -5.34f };
-                var t = model.Correlate(a, a);
-                string str = "";
-                for (int i = 0; i < t.Length; i++)
+                if (GUILayout.Button("correlate"))
                 {
-                    str += t[i].ToString("f3") + " ";
+                    var a = new float[] { 0.3f, 0.1f, 0.2f, 0.4f, 0.3f, 0.5f, -1.6f, -2.5f, 1.6f, 3.2f, 1.34f, -4.1f, -5.34f };
+                    var t = model.Correlate(a, a);
+                    string str = "";
+                    for (int i = 0; i < t.Length; i++)
+                    {
+                        str += t[i].ToString("f3") + " ";
+                    }
+                    Debug.Log(str);
                 }
-                Debug.Log(str);
-            }
-            if (GUILayout.Button("toeplitz"))
-            {
-                var c = new double[]
+                if (GUILayout.Button("toeplitz"))
                 {
+                    var c = new double[]
+                    {
                     4, -2.6, 1.7, 4.3, 11, 21, 1.3, -3, 4, 11, 9, -4, 7, 12, 0.3, -7.0
-                };
-                ToeplitzMtrix toeplitzMtrix = new ToeplitzMtrix(c);
-                Debug.Log(toeplitzMtrix);
-                var t = toeplitzMtrix.Inverse();
-                int n = (int)Math.Sqrt((double)t.Length);
-                string msg = "size: " + n;
-                for (int i = 0; i < n; i++)
-                {
-                    msg += "\n";
-                    for (int j = 0; j < n; j++) msg += t[i, j].ToString("f3") + "\t";
+                    };
+                    ToeplitzMtrix toeplitzMtrix = new ToeplitzMtrix(c);
+                    Debug.Log(toeplitzMtrix);
+                    var t = toeplitzMtrix.Inverse();
+                    int n = (int)Math.Sqrt((double)t.Length);
+                    string msg = "size: " + n;
+                    for (int i = 0; i < n; i++)
+                    {
+                        msg += "\n";
+                        for (int j = 0; j < n; j++) msg += t[i, j].ToString("f3") + "\t";
+                    }
+                    Debug.Log(msg);
                 }
-                Debug.Log(msg);
+                GUILayout.EndHorizontal();
             }
-            GUILayout.EndHorizontal();
 
             GUILayout.Space(8);
             GUILayout.Label(vowelsInfo);
